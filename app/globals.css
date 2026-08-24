@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  /* Marka renkleri — logodan: lacivert #1b2a49, altın #b8923a */
+  --color-navy-50: #f1f3f8;
+  --color-navy-100: #e0e5ef;
+  --color-navy-200: #c1cadf;
+  --color-navy-300: #97a6c5;
+  --color-navy-400: #6a7fa8;
+  --color-navy-500: #4a5f8c;
+  --color-navy-600: #374b74;
+  --color-navy-700: #2a3a5e;
+  --color-navy-800: #1b2a49;
+  --color-navy-900: #142038;
+  --color-navy-950: #0c1424;
+
+  --color-gold-50: #fbf7ee;
+  --color-gold-100: #f5ecd3;
+  --color-gold-200: #ead7a3;
+  --color-gold-300: #dcbd6e;
+  --color-gold-400: #cca64b;
+  --color-gold-500: #b8923a;
+  --color-gold-600: #9c7a2e;
+  --color-gold-700: #7d6124;
+
+  /* İş kolu vurgu renkleri */
+  --color-kraft-500: #a8693a; /* Ambalaj — kraft kahve */
+  --color-kraft-700: #7a4a26;
+  --color-fresh-500: #2f8f5b; /* Gıda — taze yeşil */
+  --color-fresh-700: #1f6b42;
+  --color-steel-500: #2f6fb0; /* Mühendislik — çelik mavi */
+  --color-steel-700: #1f4f80;
+
+  --color-ink: #172033;
+  --color-muted: #5c677a;
+  --color-line: #e4e8ef;
+
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-white text-ink antialiased;
+}
