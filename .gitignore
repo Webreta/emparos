@@ -4,3 +4,11 @@ out
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+# Tasinabilir yerel PostgreSQL (Docker yerine)
+.pgsql/
+.pgdata/
+
+# Kisisel Claude Code izinleri ve Word gecici dosyalari
+.claude/settings.local.json
+~$*

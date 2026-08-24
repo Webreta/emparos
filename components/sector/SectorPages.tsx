@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Sector } from "@/lib/sectors";
 import { site } from "@/lib/site";
@@ -11,8 +12,21 @@ export function SectorHome({ sector }: { sector: Sector }) {
   return (
     <>
       {/* Hero */}
-      <section className={`${theme.bg} px-5 pb-20 pt-44 text-white lg:px-8 lg:pt-52`}>
-        <div className="mx-auto max-w-7xl">
+      <section className={`relative ${theme.bg} px-5 pb-20 pt-44 text-white lg:px-8 lg:pt-52`}>
+        {sector.heroImage && (
+          <>
+            <Image
+              src={sector.heroImage}
+              alt={sector.name}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover opacity-25"
+            />
+            <span className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent`} />
+          </>
+        )}
+        <div className="relative mx-auto max-w-7xl">
           <span className={`block h-1 w-14 rounded-full ${theme.accent}`} />
           <p className="mt-5 text-sm font-semibold uppercase tracking-widest text-white/60">{sector.tagline}</p>
           <h1 className="mt-2 max-w-3xl text-4xl font-bold leading-tight lg:text-5xl">{sector.name}</h1>
@@ -36,16 +50,91 @@ export function SectorHome({ sector }: { sector: Sector }) {
             <Link
               key={it.slug}
               href={`${sector.base}/${it.slug}`}
-              className="group rounded-3xl border border-line bg-white p-7 transition hover:-translate-y-1 hover:shadow-xl"
+              className="group overflow-hidden rounded-3xl border border-line bg-white transition hover:-translate-y-1 hover:shadow-xl"
             >
-              <span className={`block h-1.5 w-12 rounded-full ${theme.accent}`} />
-              <h3 className="mt-5 text-lg font-bold text-ink">{it.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{it.text}</p>
-              <span className={`mt-5 inline-block text-sm font-bold ${theme.accentText}`}>İncele →</span>
+              {it.image && (
+                <div className="relative h-44 w-full overflow-hidden">
+                  <Image
+                    src={it.image}
+                    alt={it.title}
+                    fill
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover transition duration-300 group-hover:scale-105"
+                  />
+                </div>
+              )}
+              <div className="p-7">
+                <span className={`block h-1.5 w-12 rounded-full ${theme.accent}`} />
+                <h3 className="mt-5 text-lg font-bold text-ink">{it.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{it.text}</p>
+                <span className={`mt-5 inline-block text-sm font-bold ${theme.accentText}`}>İncele →</span>
+              </div>
             </Link>
           ))}
         </div>
       </section>
+
+      {/* Çalışılan markalar */}
+      {sector.brands && (
+        <section className={`${theme.soft} px-5 py-14 lg:px-8`}>
+          <div className="mx-auto max-w-7xl text-center">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted">Tedarik Ettiğimiz Markalardan</p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+              {sector.brands.map((b) =>
+                b.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- SVG logolar, boyutlar değişken
+                  <img
+                    key={b.name}
+                    src={b.logo}
+                    alt={b.name}
+                    className="h-9 w-auto opacity-60 grayscale transition hover:opacity-100 hover:grayscale-0"
+                  />
+                ) : (
+                  <span key={b.name} className="text-lg font-bold tracking-tight text-ink/50">
+                    {b.name}
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Neden biz */}
+      {sector.features && (
+        <section className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
+          <h2 className="text-3xl font-bold text-ink">Neden {sector.name}?</h2>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {sector.features.map((f) => (
+              <div key={f.title} className="rounded-3xl border border-line bg-white p-7">
+                <span className={`block h-1.5 w-10 rounded-full ${theme.accent}`} />
+                <h3 className="mt-5 text-base font-bold text-ink">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{f.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Tedarik süreci */}
+      {sector.process && (
+        <section className={`${theme.bg} px-5 py-20 text-white lg:px-8`}>
+          <div className="mx-auto max-w-7xl">
+            <h2 className="text-3xl font-bold">Nasıl Çalışıyoruz?</h2>
+            <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {sector.process.map((step, i) => (
+                <div key={step.title}>
+                  <span className={`flex size-10 items-center justify-center rounded-full ${theme.accent} text-sm font-bold`}>
+                    {i + 1}
+                  </span>
+                  <h3 className="mt-4 text-base font-bold">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/70">{step.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CTA */}
       <section className={`${theme.soft} px-5 py-20 lg:px-8`}>
@@ -71,11 +160,26 @@ export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string 
   if (!item) notFound();
   return (
     <>
-      <SectorPageHero sector={sector} title={item.title} text={item.text} crumb={sector.itemsLabel} />
+      <SectorPageHero sector={sector} title={item.title} text={item.text} crumb={sector.itemsLabel} image={item.image} />
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-3 lg:px-8">
-        <div className="space-y-4 leading-relaxed text-muted lg:col-span-2">
-          <p>{item.text}</p>
-          <p>Bu sayfanın detay içeriği (ürün listesi, görseller, teknik bilgiler) panelden yönetilecek biçimde hazırlanacak.</p>
+        <div className="lg:col-span-2">
+          <div className="space-y-4 leading-relaxed text-muted">
+            {item.paragraphs ? item.paragraphs.map((p) => <p key={p}>{p}</p>) : <p>{item.text}</p>}
+          </div>
+          {item.products && (
+            <div className="mt-10">
+              <h2 className="text-xl font-bold text-ink">{item.productsLabel ?? "Ürünler"}</h2>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                {item.products.map((p) => (
+                  <div key={p.name} className="rounded-2xl border border-line bg-white p-5">
+                    <span className={`block h-1 w-8 rounded-full ${sector.theme.accent}`} />
+                    <h3 className="mt-3 text-sm font-bold text-ink">{p.name}</h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted">{p.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <aside className="space-y-2">
           <p className="text-xs font-bold uppercase tracking-widest text-muted">{sector.itemsLabel}</p>
@@ -107,10 +211,16 @@ export function SectorSimplePage({ sector, title, text, children }: { sector: Se
   );
 }
 
-function SectorPageHero({ sector, title, text, crumb }: { sector: Sector; title: string; text?: string; crumb?: string }) {
+function SectorPageHero({ sector, title, text, crumb, image }: { sector: Sector; title: string; text?: string; crumb?: string; image?: string }) {
   return (
-    <section className={`${sector.theme.bg} px-5 pb-16 pt-44 text-white lg:px-8`}>
-      <div className="mx-auto max-w-7xl">
+    <section className={`relative ${sector.theme.bg} px-5 pb-16 pt-44 text-white lg:px-8`}>
+      {image && (
+        <>
+          <Image src={image} alt={title} fill sizes="100vw" className="object-cover opacity-20" />
+          <span className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        </>
+      )}
+      <div className="relative mx-auto max-w-7xl">
         <p className="text-xs font-semibold uppercase tracking-widest text-white/50">
           <Link href={sector.base} className="hover:text-white">{sector.name}</Link>
           {crumb && <> · {crumb}</>}
