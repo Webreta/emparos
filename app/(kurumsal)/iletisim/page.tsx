@@ -41,7 +41,7 @@ export default function ContactPage() {
           </a>
         </div>
 
-        {/* Form — gönderim işlevi (server action + DB + e-posta) sonraki adımda bağlanacak */}
+        {/* Form: gönderim işlevi (server action + DB + e-posta) sonraki adımda bağlanacak */}
         <form className="grid gap-4 lg:col-span-3 sm:grid-cols-2">
           <input className={inputCls} name="name" placeholder="Ad Soyad" required />
           <input className={inputCls} name="phone" placeholder="Telefon" />

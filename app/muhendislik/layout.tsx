@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: { default: sector.name, template: `%s | ${sector.name}` },
 };
 
-// Mühendislik alt sitesi — kendi header, renk ve menü yapısı
+// Mühendislik alt sitesi: kendi header, renk ve menü yapısı
 export default function SectorLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

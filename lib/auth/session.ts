@@ -68,7 +68,7 @@ export async function destroyAllSessions(userId: string) {
   await db.delete(sessions).where(eq(sessions.userId, userId));
 }
 
-// Aynı render ağacında tekrar tekrar çağrılabilir — tek DB sorgusu atar.
+// Aynı render ağacında tekrar tekrar çağrılabilir: tek DB sorgusu atar.
 export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const jar = await cookies();
   const token = jar.get(COOKIE_NAME)?.value;

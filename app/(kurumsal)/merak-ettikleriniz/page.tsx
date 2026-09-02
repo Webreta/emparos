@@ -3,7 +3,7 @@ import { CoverPage } from "@/components/site/CoverPage";
 
 export const metadata: Metadata = { title: "Merak Ettikleriniz" };
 
-// Sık sorulan sorular — içerik panelden yönetilir hale getirilecek
+// Sık sorulan sorular: içerik panelden yönetilir hale getirilecek
 const faqs = [
   {
     q: "Emparos Global hangi alanlarda hizmet veriyor?",

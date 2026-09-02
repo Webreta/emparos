@@ -1,6 +1,6 @@
 import { requireSection } from "@/lib/auth/session";
 
-// Genel içerikler sekmesi — site bölümleri netleştikçe formlar buraya eklenecek
+// Genel içerikler sekmesi: site bölümleri netleştikçe formlar buraya eklenecek
 export default async function AdminGeneralContentPage() {
   await requireSection("genel");
   return (

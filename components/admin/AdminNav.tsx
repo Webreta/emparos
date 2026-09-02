@@ -6,7 +6,7 @@ import { Icon, type IconName } from "@/components/site/Icon";
 
 type NavItem = { href: string; label: string; icon: IconName };
 
-// Panel sol menüsü — bulunulan sekme renkli gösterilir
+// Panel sol menüsü: bulunulan sekme renkli gösterilir
 export function AdminNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 

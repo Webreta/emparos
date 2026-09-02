@@ -8,7 +8,7 @@ import { site } from "@/lib/site";
 import { divisions } from "@/lib/divisions";
 
 // Kurumsal (cover) sayfaların header'ı: Ege Yatçılık'taki gibi üstten sarkan,
-// alt köşeleri oval tek parça kart — transparan/cam efektli, altın çerçeveli.
+// alt köşeleri oval tek parça kart: transparan/cam efektli, altın çerçeveli.
 // Sol: Sektörler, Hakkımızda (cam butonlar) · Orta: logo
 // Sağ: e-posta (düz metin), sosyal ikonlar (yalın), İletişim (cam buton, en sağda)
 
@@ -18,7 +18,7 @@ const left = [
 ];
 const right = [{ href: "/iletisim", label: "İletişim" }];
 
-// Sosyal medya — adres boşsa gösterilmez (site.ts / ileride panelden)
+// Sosyal medya: adres boşsa gösterilmez (site.ts / ileride panelden)
 const socials = [
   { key: "instagram", href: site.instagram, label: "Instagram" },
   { key: "linkedin", href: site.linkedin, label: "LinkedIn" },

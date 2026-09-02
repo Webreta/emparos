@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { divisions } from "@/lib/divisions";
 
 // Ana sayfa cover'ı: tam ekran, üç iş kolu üç dikey panel (seta-global mantığı).
@@ -14,6 +15,22 @@ export function SplitHero() {
           rel={d.external ? "noopener noreferrer" : undefined}
           className={`group relative flex min-h-[60vh] flex-1 flex-col justify-end overflow-hidden bg-gradient-to-br ${d.bg} p-8 pt-28 text-white transition-all duration-500 ease-out lg:min-h-0 lg:p-12 lg:pb-14 lg:hover:flex-[1.6]`}
         >
+          {/* Arka plan görseli: hover'da hafif yakınlaşır; üstüne panel rengi degrade biner */}
+          {d.image && (
+            <>
+              <Image
+                src={d.image}
+                alt=""
+                fill
+                priority
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                className="object-cover transition duration-700 ease-out group-hover:scale-105"
+              />
+              <span className={`absolute inset-0 bg-gradient-to-t ${d.bg} opacity-80 transition duration-500 group-hover:opacity-70`} />
+              <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            </>
+          )}
+
           {/* Dekoratif dünya çizgileri (logoya gönderme) */}
           <svg
             viewBox="0 0 400 400"

@@ -12,7 +12,12 @@
       "WebFetch",
       "WebSearch",
       "Skill",
-      "Agent"
+      "Agent",
+      "NotebookEdit",
+      "ToolSearch",
+      "Artifact",
+      "mcp__claude-in-chrome",
+      "mcp__ide"
     ]
   }
 }

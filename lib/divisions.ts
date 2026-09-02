@@ -1,4 +1,4 @@
-// Üç iş kolu — ana sayfadaki bölünmüş giriş ve menüde kullanılır.
+// Üç iş kolu: ana sayfadaki bölünmüş giriş ve menüde kullanılır.
 // İçerikler panelden yönetilir hale geldiğinde buradaki değerler varsayılan kalır.
 
 export type Division = {
@@ -13,6 +13,8 @@ export type Division = {
   accent: string;
   accentText: string;
   bg: string;
+  // Panel arka plan görseli (opsiyonel; yoksa yalnızca degrade)
+  image?: string;
   items: string[];
 };
 
@@ -28,6 +30,7 @@ export const divisions: Division[] = [
     accent: "bg-kraft-500",
     accentText: "text-kraft-500",
     bg: "from-[#2b1a0e] via-[#4a2f1a] to-[#7a4a26]",
+    image: "/kapak/ambalaj-kraft.jpg",
     items: ["Kraft torba ve poşet", "Oluklu mukavva kutu", "Özel baskılı ambalaj"],
   },
   {
@@ -41,6 +44,7 @@ export const divisions: Division[] = [
     accent: "bg-fresh-500",
     accentText: "text-fresh-500",
     bg: "from-[#0d2a1a] via-[#16472c] to-[#1f6b42]",
+    image: "/kapak/gida-panel.jpg",
     items: ["İçecek (Coca-Cola, Red Bull)", "Şekerleme (Haribo)", "Kağıt havlu & tuvalet kağıdı"],
   },
   {
@@ -54,6 +58,7 @@ export const divisions: Division[] = [
     accent: "bg-steel-500",
     accentText: "text-steel-500",
     bg: "from-[#0c1424] via-[#142038] to-[#1f4f80]",
+    image: "/kapak/muhendislik-panel.jpg",
     items: ["Yönetim & İK danışmanlığı", "Üretim & yalın dönüşüm", "Veri analizi & proje yönetimi"],
   },
 ];

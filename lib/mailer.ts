@@ -59,6 +59,52 @@ export async function sendContactNotification(data: ContactMail) {
   });
 }
 
+type QuoteMail = {
+  sectorName: string;
+  name: string;
+  company?: string;
+  email: string;
+  phone?: string;
+  product?: string;
+  quantity?: string;
+  message: string;
+};
+
+// Teklif formu bildirimi gönderir; SMTP ayarları eksikse sessizce atlar.
+export async function sendQuoteNotification(data: QuoteMail) {
+  const settings = await getTechnicalSettings();
+  const { smtp, mailTo } = settings;
+  if (!smtp.host || !smtp.user || !mailTo) return;
+
+  const recipients = mailTo
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
+  if (recipients.length === 0) return;
+
+  const transporter = createTransporter(smtp);
+
+  await transporter.sendMail({
+    from: smtp.from || smtp.user,
+    to: recipients,
+    replyTo: data.email,
+    subject: `Teklif talebi (${data.sectorName}): ${data.company || data.name}`,
+    text: [
+      `Bölüm: ${data.sectorName}`,
+      `Ad Soyad: ${data.name}`,
+      data.company ? `Firma: ${data.company}` : null,
+      `E-posta: ${data.email}`,
+      data.phone ? `Telefon: ${data.phone}` : null,
+      data.product ? `Ürün grubu: ${data.product}` : null,
+      data.quantity ? `Tahmini miktar: ${data.quantity}` : null,
+      "",
+      data.message,
+    ]
+      .filter((l) => l !== null)
+      .join("\n"),
+  });
+}
+
 // Panelden SMTP testine yarar: kayıtlı ayarlarla verilen adrese test e-postası atar.
 // Hata durumunda fırlatır; çağıran taraf mesajı kullanıcıya gösterir.
 export async function sendTestMail(to: string) {

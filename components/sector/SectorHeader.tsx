@@ -14,10 +14,11 @@ export function SectorHeader({ sector }: { sector: Sector }) {
   const [open, setOpen] = useState(false);
   const { theme } = sector;
 
+  const quoteHref = `${sector.base}/teklif`;
   const nav = [
     { href: sector.base, label: "Ana Sayfa", exact: true },
     { href: `${sector.base}#urunler`, label: sector.itemsLabel, dropdown: true },
-    { href: `${sector.base}/hakkimizda`, label: "Hakkımızda" },
+    ...(sector.hasAboutPage ? [{ href: `${sector.base}/hakkimizda`, label: "Hakkımızda" }] : []),
     { href: `${sector.base}/iletisim`, label: "İletişim" },
   ];
   const isActive = (href: string, exact?: boolean) =>
@@ -86,14 +87,12 @@ export function SectorHeader({ sector }: { sector: Sector }) {
                 </Link>
               )
             )}
-            <a
-              href={site.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href={quoteHref}
               className={`ml-2 rounded-lg ${theme.accent} ${theme.accentHover} px-4 py-2 text-sm font-bold text-white transition`}
             >
               Teklif Al
-            </a>
+            </Link>
           </nav>
 
           <button
@@ -128,6 +127,13 @@ export function SectorHeader({ sector }: { sector: Sector }) {
                   </Link>
                 ))}
               </div>
+              <Link
+                href={quoteHref}
+                onClick={() => setOpen(false)}
+                className={`mt-3 rounded-lg ${theme.accent} px-4 py-2.5 text-center text-base font-bold text-white`}
+              >
+                Teklif Al
+              </Link>
             </div>
           </nav>
         </div>
