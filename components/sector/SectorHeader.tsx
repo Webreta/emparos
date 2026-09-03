@@ -19,6 +19,7 @@ export function SectorHeader({ sector }: { sector: Sector }) {
     { href: sector.base, label: "Ana Sayfa", exact: true },
     { href: `${sector.base}#urunler`, label: sector.itemsLabel, dropdown: true },
     ...(sector.hasAboutPage ? [{ href: `${sector.base}/hakkimizda`, label: "Hakkımızda" }] : []),
+    ...(sector.hasBrandsPage ? [{ href: `${sector.base}/markalar`, label: "Markalar" }] : []),
     { href: `${sector.base}/iletisim`, label: "İletişim" },
   ];
   const isActive = (href: string, exact?: boolean) =>

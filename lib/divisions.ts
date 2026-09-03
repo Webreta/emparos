@@ -41,9 +41,10 @@ export const divisions: Division[] = [
     href: "/gida",
     external: false,
     cta: "Ürünleri Keşfet",
-    accent: "bg-fresh-500",
-    accentText: "text-fresh-500",
-    bg: "from-[#0d2a1a] via-[#16472c] to-[#1f6b42]",
+    // Gıda alt sitesiyle uyumlu: lacivert zemin, altın vurgu (logo renkleri)
+    accent: "bg-gold-500",
+    accentText: "text-gold-500",
+    bg: "from-[#0c1424] via-[#1b2a49] to-[#7d6124]",
     image: "/kapak/gida-panel.jpg",
     items: ["İçecek (Coca-Cola, Red Bull)", "Şekerleme (Haribo)", "Kağıt havlu & tuvalet kağıdı"],
   },

@@ -6,16 +6,21 @@ import type { Sector } from "@/lib/sectors";
 import { site } from "@/lib/site";
 import { SectorIcon, type SectorIconKey } from "@/components/sector/icons";
 import { QuoteForm } from "@/components/sector/QuoteForm";
+import { CategoryFilter, type FilterGroup } from "@/components/sector/CategoryFilter";
+import { BrandGrid } from "@/components/sector/BrandGrid";
+import { markalar } from "@/lib/gida-markalar";
 
 // Alt site sayfa şablonları. İki sektör de aynı iskeleti kullanır,
 // renk/metin/menü farkı `sector` nesnesinden gelir.
 
 export function SectorHome({ sector }: { sector: Sector }) {
   const { theme } = sector;
+  // Ana sayfa logo kaydırağı: logosu olan markalardan en fazla 30 tanesi (ürün sayısına göre)
+  const brands = sector.hasBrandsPage ? markalar().filter((b) => b.logo).slice(0, 30) : [];
   return (
     <>
       {/* Hero */}
-      <section className={`relative ${theme.bg} px-5 pb-20 pt-44 text-white lg:px-8 lg:pt-52`}>
+      <section className={`relative ${theme.bg} px-5 pt-44 text-white lg:px-8 lg:pt-56 ${brands.length ? "pb-48 lg:pb-60" : "pb-20 lg:pb-28"}`}>
         {sector.heroImage && (
           <>
             <Image
@@ -24,18 +29,20 @@ export function SectorHome({ sector }: { sector: Sector }) {
               fill
               priority
               sizes="100vw"
-              className="object-cover"
+              // Görsel üstten hizalı: raflar ve paletler görünür, forkliftin yalnızca üst kısmı kadrajda kalır
+              className="object-cover object-[center_15%]"
             />
             {/* Soldan sağa açılan sektör rengi katmanı: metin okunur kalsın, görsel sağda net görünsün */}
             <span className={`absolute inset-0 bg-gradient-to-r ${theme.heroFrom} via-black/50 to-black/20`} />
             <span className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
           </>
         )}
+        {/* Logo şeridi varsa hero alt kenarı beyaza akarak biter, şerit bu geçişin üzerine biner */}
+        {brands.length > 0 && <span className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-white via-white/60 to-transparent" />}
         <div className="relative mx-auto max-w-7xl">
-          <span className={`block h-1 w-14 rounded-full ${theme.accent}`} />
-          <p className="mt-5 text-sm font-semibold uppercase tracking-widest text-white/60">{sector.tagline}</p>
-          <h1 className="mt-2 max-w-3xl text-4xl font-bold leading-tight lg:text-5xl">{sector.name}</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/75">{sector.intro}</p>
+          {/* Üst başlık ve vurgu çizgisi kaldırıldı; alt metin en fazla 2 satır */}
+          <h1 className="max-w-3xl text-4xl font-bold leading-tight lg:text-5xl">{sector.name}</h1>
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/75 lg:line-clamp-2">{sector.intro}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href="#urunler" className={`rounded-full ${theme.accent} ${theme.accentHover} px-6 py-3 text-sm font-bold text-white transition`}>
               {sector.itemsLabel}
@@ -47,27 +54,30 @@ export function SectorHome({ sector }: { sector: Sector }) {
         </div>
       </section>
 
-      {/* Çalışılan markalar: hero'nun hemen altında, ortalı */}
-      {sector.brands && (
-        <section className="px-5 pb-4 pt-12 lg:px-8">
-          <div className="mx-auto max-w-7xl text-center">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted">Tedarik Ettiğimiz Markalar</p>
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-x-14 gap-y-6 lg:gap-x-20">
-              {sector.brands.map((b) =>
-                b.logo ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- SVG logolar, boyutlar değişken
-                  <img
-                    key={b.name}
-                    src={b.logo}
-                    alt={b.name}
-                    className="h-10 w-auto opacity-70 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0 lg:h-12"
-                  />
-                ) : (
-                  <span key={b.name} className="text-lg font-bold tracking-tight text-ink/50">
-                    {b.name}
-                  </span>
-                )
-              )}
+      {/* Marka kaydırağı: hero'nun alt kenarına binen eşit boyutlu logo kutuları (aynı liste iki kez basılır, sonsuz akar) */}
+      {brands.length > 0 && (
+        <section className="relative z-10 -mt-24 px-0 pb-4">
+          <div className="marquee relative overflow-hidden py-3 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
+            <div className="marquee-track flex w-max">
+              {[0, 1].map((copy) => (
+                <div key={copy} aria-hidden={copy === 1} className="flex shrink-0 items-center gap-4 pr-4">
+                  {brands.map((b) => (
+                    <Link
+                      key={b.slug}
+                      href={`${sector.base}/markalar`}
+                      tabIndex={copy === 1 ? -1 : undefined}
+                      className="group flex h-24 w-44 shrink-0 items-center justify-center rounded-lg border border-ink/10 bg-white px-6 shadow-[0_8px_30px_-12px_rgba(23,32,51,0.18)] transition duration-300 hover:-translate-y-0.5 hover:border-navy-800"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element -- SVG/PNG logolar, boyutlar değişken */}
+                      <img
+                        src={b.logo}
+                        alt={copy === 0 ? b.name : ""}
+                        className="h-14 w-[140px] object-contain"
+                      />
+                    </Link>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -76,20 +86,32 @@ export function SectorHome({ sector }: { sector: Sector }) {
       {/* Ürün / hizmet grupları */}
       <section id="urunler" className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
         <h2 className="text-3xl font-bold text-ink">{sector.itemsLabel}</h2>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* 2'li dizilim; her kartın üstünde 3:1 banner alanı (görsel gelene kadar boş yer tutucu; `banner` alanı dolunca görsel basılır) */}
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
           {sector.items.map((it) => (
             <Link
               key={it.slug}
               href={`${sector.base}/${it.slug}`}
-              className="group flex flex-col rounded-[28px] border border-ink/10 bg-[#f7f7f4] p-8 shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:bg-white hover:shadow-[0_24px_60px_-24px_rgba(23,32,51,0.25)]"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-ink/10 bg-[#f7f7f4] shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:bg-white hover:shadow-[0_24px_60px_-24px_rgba(23,32,51,0.25)]"
             >
-              {it.icon && (
-                <span className={`flex size-[72px] items-center justify-center rounded-[20px] bg-white ${theme.accentText} shadow-sm ring-1 ring-black/5 transition duration-300 ${theme.iconHover} group-hover:text-white`}>
-                  <SectorIcon name={it.icon} className="size-9" />
-                </span>
-              )}
-              <h3 className="mt-6 text-[22px] font-bold tracking-tight text-ink">{it.title}</h3>
-              <p className="mt-3 flex-1 text-[15px] leading-relaxed text-ink/80">{it.text}</p>
+              <div className="relative aspect-[3/1] w-full overflow-hidden bg-navy-50">
+                {it.banner ? (
+                  <Image
+                    src={it.banner}
+                    alt={it.title}
+                    fill
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className="object-cover transition duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <span className="flex h-full items-center justify-center text-xs font-semibold uppercase tracking-widest text-navy-300">
+                    Görsel gelecek
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col p-8">
+              <h3 className="text-[22px] font-bold tracking-tight text-ink">{it.title}</h3>
+              <p className="mt-3 flex-1 truncate text-[15px] leading-relaxed text-ink/80" title={it.text}>{it.text}</p>
               <span className="mt-7 inline-flex items-center gap-2 self-start rounded-full border border-ink bg-white px-4 py-2 text-sm font-semibold text-ink transition duration-300 group-hover:bg-ink group-hover:text-white">
                 İncele
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4 transition group-hover:translate-x-0.5" aria-hidden="true">
@@ -97,6 +119,7 @@ export function SectorHome({ sector }: { sector: Sector }) {
                   <path d="m12 5 7 7-7 7" />
                 </svg>
               </span>
+              </div>
             </Link>
           ))}
         </div>
@@ -119,7 +142,7 @@ export function SectorHome({ sector }: { sector: Sector }) {
                       </svg>
                     </span>
                   )}
-                  <div className="flex flex-1 flex-col rounded-3xl border border-white/25 p-7 transition hover:border-white/50 hover:bg-white/5">
+                  <div className="flex flex-1 flex-col rounded-2xl border border-white/25 p-7 transition hover:border-white/50 hover:bg-white/5">
                     <span className={`flex size-10 items-center justify-center rounded-full ${theme.accent} text-sm font-bold`}>
                       {i + 1}
                     </span>
@@ -141,7 +164,7 @@ export function SectorHome({ sector }: { sector: Sector }) {
             {sector.features.map((f) => (
               <div
                 key={f.title}
-                className="group rounded-[28px] border border-ink/10 bg-[#f7f7f4] p-7 shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:bg-white hover:shadow-[0_24px_60px_-24px_rgba(23,32,51,0.25)]"
+                className="group rounded-2xl border border-ink/10 bg-[#f7f7f4] p-7 shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:bg-white hover:shadow-[0_24px_60px_-24px_rgba(23,32,51,0.25)]"
               >
                 {f.icon ? (
                   <span className={`flex size-14 items-center justify-center rounded-2xl bg-white ${theme.accentText} shadow-sm ring-1 ring-black/5 transition duration-300 ${theme.iconHover} group-hover:text-white`}>
@@ -191,7 +214,7 @@ export function SectorCta({ sector }: { sector: Sector }) {
 
 // Ana sayfa kartlarıyla aynı görsel dil: kırık beyaz zemin, ince çerçeve, yumuşak gölge, hover'da yükselme.
 const cardClass =
-  "rounded-[28px] border border-ink/10 bg-[#f7f7f4] shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:bg-white hover:shadow-[0_24px_60px_-24px_rgba(23,32,51,0.25)]";
+  "rounded-2xl border border-ink/10 bg-[#f7f7f4] shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:bg-white hover:shadow-[0_24px_60px_-24px_rgba(23,32,51,0.25)]";
 
 // Kart içindeki ikon kutusu (hover'da sektör rengine dolar)
 function CardIcon({ sector, name, size = "md" }: { sector: Sector; name: SectorIconKey; size?: "sm" | "md" }) {
@@ -209,14 +232,17 @@ export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string 
   if (!item) notFound();
   return (
     <>
-      <SectorPageHero sector={sector} title={item.title} text={item.text} crumb={sector.itemsLabel} image={item.image} />
+      <SectorPageHero sector={sector} title={item.title} text={item.text} image={item.image} />
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-3 lg:px-8">
         <div className="lg:col-span-2">
-          <div className="space-y-4 text-[17px] leading-relaxed text-ink/80">
-            {item.paragraphs ? item.paragraphs.map((p) => <p key={p}>{p}</p>) : <p>{item.text}</p>}
-          </div>
+          {/* Ürün listesi olan sayfalarda giriş metni gösterilmez, doğrudan kategoriler gelir */}
+          {!item.products && (
+            <div className="space-y-4 text-[17px] leading-relaxed text-ink/80">
+              {item.paragraphs ? item.paragraphs.map((p) => <p key={p}>{p}</p>) : <p>{item.text}</p>}
+            </div>
+          )}
           {item.products && (
-            <div className="mt-12">
+            <div>
               <h2 className="text-2xl font-bold tracking-tight text-ink">{item.productsLabel ?? "Ürünler"}</h2>
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
                 {item.products.map((p) => {
@@ -225,7 +251,7 @@ export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string 
                     <>
                       <div>
                         <h3 className="text-lg font-bold tracking-tight text-ink">{p.name}</h3>
-                        <p className="mt-2 text-sm leading-relaxed text-ink/80">{p.desc}</p>
+                        <p className="mt-2 truncate text-sm leading-relaxed text-ink/80" title={p.desc}>{p.desc}</p>
                       </div>
                       <span className="mt-5 inline-flex items-center gap-2 self-start rounded-full border border-ink bg-white px-4 py-2 text-sm font-semibold text-ink transition duration-300 group-hover:bg-ink group-hover:text-white">
                         Ürünleri Gör
@@ -279,7 +305,7 @@ export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string 
           </div>
 
           {/* Teklif kartı */}
-          <div className={`rounded-[28px] ${sector.theme.bg} p-7 text-white`}>
+          <div className={`rounded-2xl ${sector.theme.bg} p-7 text-white`}>
             <p className="text-lg font-bold">Bu ürün grubu için teklif alın</p>
             <p className="mt-2 text-sm leading-relaxed text-white/70">Adet ve teslimat noktasını iletin, aynı gün fiyat teklifiyle dönelim.</p>
             <Link
@@ -300,91 +326,102 @@ export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string 
   );
 }
 
-// Kategori sayfası: ürün grubu altındaki bir kategorinin ürünlerini kart kart listeler (görsel + ad).
-export function SectorCategoryPage({ sector, slug, category }: { sector: Sector; slug: string; category: string }) {
+// Kategori sayfası: solda akordeon filtre (ana kategoriler > alt kategoriler, çoklu seçim), sağda 3'lü ürün grid'i.
+// `selected` URL'deki ?k=slug,slug parametresinden gelir; boşsa yalnızca sayfanın kendi kategorisi listelenir.
+export function SectorCategoryPage({
+  sector,
+  slug,
+  category,
+  selected = [],
+}: {
+  sector: Sector;
+  slug: string;
+  category: string;
+  selected?: string[];
+}) {
   const item = sector.items.find((i) => i.slug === slug);
   const cat = item?.products?.find((p) => p.slug === category);
   if (!item || !cat || !cat.products?.length) notFound();
-  const siblings = item.products!.filter((p) => p.products?.length);
+
+  // Filtre ağacı: ürün listesi olan tüm gruplar ve alt kategorileri
+  const groups: FilterGroup[] = sector.items
+    .map((it) => ({
+      slug: it.slug,
+      title: it.title,
+      cats: (it.products ?? []).filter((c) => c.products?.length).map((c) => ({ slug: c.slug, name: c.name, count: c.products!.length })),
+    }))
+    .filter((g) => g.cats.length > 0);
+  const allCats = groups.flatMap((g) => g.cats.map((c) => c.slug));
+
+  // Geçerli seçim; hiç yoksa sayfanın kendi kategorisi. "tumu" → filtre yok, tüm ürünler.
+  const hepsi = selected.includes("tumu");
+  const active = selected.filter((k) => allCats.includes(k));
+  const chosen = hepsi ? allCats : active.length ? active : [cat.slug];
+
+  // Seçili kategorilerin ürünleri birleştirilir, Türkçe alfabetik sıralanır
+  const chosenCats = sector.items.flatMap((it) => (it.products ?? []).filter((c) => chosen.includes(c.slug)));
+  const products = chosenCats
+    .flatMap((c) => c.products ?? [])
+    .sort((a, b) => a.name.localeCompare(b.name, "tr"));
 
   return (
     <>
-      <SectorPageHero sector={sector} title={cat.name} text={cat.desc} crumb={item.title} crumbHref={`${sector.base}/${item.slug}`} image={item.image} />
-      <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-muted">{item.title}</p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-ink">Ürünler</h2>
-          </div>
-          <p className="text-sm text-ink/70">{cat.products.length} ürün</p>
-        </div>
+      <SectorPageHero sector={sector} title={cat.name} text={cat.desc} image={item.image} />
+      <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-4 lg:px-8">
+        <aside className="self-start lg:sticky lg:top-28">
+          <CategoryFilter groups={groups} selected={hepsi ? [] : chosen} accent={sector.theme.accent} />
+        </aside>
 
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {cat.products.map((p) => (
-            // Aynı ad birden fazla üründe geçebilir (varyantlar); görsel yolu slug tabanlı ve benzersiz
-            <div key={p.image} className={`group flex flex-col overflow-hidden ${cardClass}`}>
-              <div className="relative aspect-square w-full bg-white">
-                <Image
-                  src={p.image}
-                  alt={p.name}
-                  fill
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                  className="object-contain p-6 transition duration-500 group-hover:scale-105"
-                />
-              </div>
-              <div className="border-t border-ink/5 p-5">
-                <h3 className="text-sm font-bold leading-snug text-ink">{p.name}</h3>
-              </div>
+        {/* Ürünler */}
+        <div className="lg:col-span-3">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-ink">{hepsi ? "Tüm Ürünler" : "Ürünler"}</h2>
+              {!hepsi && chosenCats.length > 1 && (
+                <p className="mt-1 text-sm text-ink/70">{chosenCats.map((c) => c.name).join(" · ")}</p>
+              )}
             </div>
-          ))}
-        </div>
-
-        {/* Diğer kategoriler + teklif */}
-        <div className="mt-14 grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            {siblings.length > 1 && (
-              <>
-                <p className="text-xs font-bold uppercase tracking-widest text-muted">Diğer kategoriler</p>
-                <div className="mt-4 flex flex-wrap gap-2.5">
-                  {siblings
-                    .filter((p) => p.slug !== cat.slug)
-                    .map((p) => (
-                      <Link
-                        key={p.slug}
-                        href={`${sector.base}/${item.slug}/${p.slug}`}
-                        className="rounded-full border border-ink/15 bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-ink hover:bg-ink hover:text-white"
-                      >
-                        {p.name}
-                      </Link>
-                    ))}
+            <p className="text-sm text-ink/70">{products.length} ürün</p>
+          </div>
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((p) => (
+              // Aynı ad birden fazla üründe geçebilir (varyantlar); görsel yolu slug tabanlı ve benzersiz
+              <div key={p.image} className="group flex flex-col overflow-hidden rounded-lg border border-navy-800 bg-white transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-20px_rgba(27,42,73,0.35)]">
+                <div className="relative aspect-square w-full bg-white">
+                  <Image
+                    src={p.image}
+                    alt={p.name}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-contain p-6 transition duration-500 group-hover:scale-105"
+                  />
                 </div>
-              </>
-            )}
-            <Link
-              href={`${sector.base}/${item.slug}`}
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ink hover:underline"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4" aria-hidden="true">
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-              {item.title} sayfasına dön
-            </Link>
-          </div>
-          <div className={`rounded-[28px] ${sector.theme.bg} p-7 text-white`}>
-            <p className="text-lg font-bold">Bu ürünler için teklif alın</p>
-            <p className="mt-2 text-sm leading-relaxed text-white/70">İstediğiniz ürün ve adetleri iletin, aynı gün fiyat teklifiyle dönelim.</p>
-            <Link
-              href={`${sector.base}/teklif`}
-              className={`mt-5 inline-flex items-center gap-2 rounded-full ${sector.theme.accent} ${sector.theme.accentHover} px-5 py-2.5 text-sm font-bold text-white transition`}
-            >
-              Teklif Formu
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4" aria-hidden="true">
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
-            </Link>
+                <div className="border-t border-navy-800/20 px-4 py-3.5">
+                  <h3 className="text-center text-sm font-normal leading-snug text-ink/80">{p.name}</h3>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+      </section>
+      <SectorCta sector={sector} />
+    </>
+  );
+}
+
+// Markalar sayfası: tedarik edilen tüm markalar, logo veya baş harf kartlarıyla (arama kutulu grid).
+export function SectorBrandsPage({ sector }: { sector: Sector }) {
+  const liste = markalar();
+  return (
+    <>
+      <SectorPageHero
+        sector={sector}
+        title="Markalar"
+        text={`Katalogumuzda ${liste.length} markanın gıda, içecek ve temizlik ürünleri yer alıyor. Aradığınız markayı bulamazsanız teklif formundan iletin.`}
+        image={sector.heroImage}
+      />
+      <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
+        <BrandGrid brands={liste} />
       </section>
       <SectorCta sector={sector} />
     </>
@@ -495,7 +532,7 @@ export function SectorContactPage({ sector }: { sector: Sector }) {
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           {/* Teklif kartı */}
-          <div className={`rounded-[28px] ${sector.theme.bg} p-8 text-white`}>
+          <div className={`rounded-2xl ${sector.theme.bg} p-8 text-white`}>
             <p className="text-xs font-bold uppercase tracking-widest text-white/60">Fiyat teklifi</p>
             <h2 className="mt-3 text-2xl font-bold">Teklif formunu doldurun</h2>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-white/70">
@@ -538,15 +575,11 @@ function SectorPageHero({
   sector,
   title,
   text,
-  crumb,
-  crumbHref,
   image,
 }: {
   sector: Sector;
   title: string;
   text?: string;
-  crumb?: string;
-  crumbHref?: string;
   image?: string;
 }) {
   return (
@@ -557,22 +590,9 @@ function SectorPageHero({
           <span className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </>
       )}
+      {/* Üst başlık (ekmek kırıntısı) ve vurgu çizgisi kaldırıldı; hero yalnızca başlık + kısa metin */}
       <div className="relative mx-auto max-w-7xl">
-        <p className="text-xs font-semibold uppercase tracking-widest text-white/50">
-          <Link href={sector.base} className="hover:text-white">{sector.name}</Link>
-          {crumb && (
-            <>
-              {" · "}
-              {crumbHref ? (
-                <Link href={crumbHref} className="hover:text-white">{crumb}</Link>
-              ) : (
-                crumb
-              )}
-            </>
-          )}
-        </p>
-        <span className={`mt-4 block h-1 w-12 rounded-full ${sector.theme.accent}`} />
-        <h1 className="mt-4 text-3xl font-bold lg:text-4xl">{title}</h1>
+        <h1 className="text-3xl font-bold lg:text-4xl">{title}</h1>
         {text && <p className="mt-3 max-w-xl text-white/70">{text}</p>}
       </div>
     </section>

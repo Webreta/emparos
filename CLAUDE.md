@@ -40,3 +40,5 @@ Drizzle ORM + PostgreSQL (postgres.js), bcryptjs, zod v4, nodemailer, sharp. `ou
 ## Durum
 
 İskelet kuruldu: auth, panel (Genel + Teknik), uploads, SMTP, SEO, kullanıcı yönetimi hazır. Site yapısı: `(kurumsal)` grubu = tam ekran cover (3 panel) + transparan ortası logolu `CoverHeader` + cover içinde kalan sayfalar (hakkımızda, iletişim, sektörler, merak-ettikleriniz — `CoverPage` şablonu); `/gida` ve `/muhendislik` = kendi header/footer/renk temasıyla alt siteler (`lib/sectors.ts`, `components/sector/*`). İş kolu verileri `lib/divisions.ts`. Yerel Postgres port **5434**.
+
+Gıda alt sitesi (2026-09-03): tema lacivert+gold (`navy-*`/`gold-*` token'ları); ana sayfada hero → eşit kutulu logo kaydırağı (`markalar()` ilk 30) → 2'li ürün grubu kartları (3:1 banner alanı boş, `banner` alanı bekliyor). Ürün listesi sayfası: solda akordeon filtre (`CategoryFilter`, çoklu seçim `?k=slug,slug`, `?k=tumu` = tüm ürünler), sağda 3'lü grid. `/gida/markalar`: katalogdan türetilen ~150 marka (`lib/gida-markalar.ts`), logolar `public/gida/markalar/` (Haribo referanslı normalize, 280x112 PNG; üretim betiği session scratchpad'indeydi, gerekirse yeniden yazılır).

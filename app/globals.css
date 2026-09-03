@@ -41,3 +41,18 @@
 body {
   @apply bg-white text-ink antialiased;
 }
+
+/* Marka kaydırağı: iki kopyalı şerit sola akar, üzerine gelince durur */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee 50s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}

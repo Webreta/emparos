@@ -19,6 +19,8 @@ export type SectorItem = {
   text: string;
   // Ana sayfa kartında gösterilen çizgisel ikon (components/sector/icons.tsx)
   icon?: SectorIconKey;
+  // Ana sayfa kartındaki 3:1 banner görseli (henüz yok; gelince buraya yol yazılır)
+  banner?: string;
   // Detay sayfası içeriği (opsiyonel; yoksa kısa metinle yetinilir)
   image?: string;
   paragraphs?: string[];
@@ -36,9 +38,10 @@ export type Sector = {
   items: SectorItem[];
   // Alt sitede ayrı bir "Hakkımızda" sayfası var mı (menüde gösterilir)
   hasAboutPage?: boolean;
+  // Alt sitede "Markalar" sayfası var mı (menüde gösterilir; ana sayfada logo kaydırağı çıkar)
+  hasBrandsPage?: boolean;
   // Ana sayfa zengin içerik blokları (opsiyonel)
   heroImage?: string;
-  brands?: { name: string; logo?: string }[];
   features?: { title: string; text: string; icon?: SectorIconKey }[];
   stats?: { value: string; label: string }[];
   process?: { title: string; text: string }[];
@@ -62,13 +65,13 @@ export const sectors: Record<Sector["key"], Sector> = {
     name: "Emparos Gıda",
     tagline: "Gıda, İçecek & Temizlik Ürünleri Tedariki",
     intro:
-      "Dünya markalarının gıda, içecek ve temizlik ürünlerini güvenilir, hızlı ve sürdürülebilir biçimde tedarik ediyoruz. Toptan alımdan ihracata, tek noktadan çözüm.",
+      "Dünya markalarının gıda, içecek ve temizlik ürünlerini güvenilir biçimde tedarik ediyoruz. Toptan alımdan ihracata tek noktadan çözüm.",
     itemsLabel: "Ürün Grupları",
     items: [
       {
         slug: "icecek",
         title: "İçecek",
-        text: "Coca-Cola, Red Bull ve dünya markalarının gazlı, enerji ve meyveli içecekleri.",
+        text: "Coca-Cola, Red Bull ve dünya markalarının içecekleri.",
         icon: "icecek",
         image: "/gida/icecek.jpg",
         paragraphs: [
@@ -80,7 +83,7 @@ export const sectors: Record<Sector["key"], Sector> = {
           {
             slug: "coca-cola",
             name: "Coca-Cola Ürün Ailesi",
-            desc: "Coca-Cola, Fanta, Cappy ve Fuse Tea; kutu, pet ve cam şişe seçenekleriyle.",
+            desc: "Coca-Cola, Fanta, Cappy ve Fuse Tea.",
             products: cocaColaUrunleri,
           },
           ...katalogKategorileri("icecek"),
@@ -89,7 +92,7 @@ export const sectors: Record<Sector["key"], Sector> = {
       {
         slug: "sekerleme",
         title: "Şekerleme & Atıştırmalık",
-        text: "Haribo başta olmak üzere şekerleme ve atıştırmalık ürün grupları.",
+        text: "Haribo başta olmak üzere şekerleme ve atıştırmalıklar.",
         icon: "sekerleme",
         image: "/gida/sekerleme.jpg",
         paragraphs: [
@@ -101,7 +104,7 @@ export const sectors: Record<Sector["key"], Sector> = {
           {
             slug: "haribo",
             name: "Haribo",
-            desc: "Yumuşak şeker ve jelibon çeşitleri, farklı gramaj seçenekleriyle.",
+            desc: "Yumuşak şeker ve jelibon çeşitleri.",
             products: hariboUrunleri,
           },
           ...katalogKategorileri("sekerleme"),
@@ -110,7 +113,7 @@ export const sectors: Record<Sector["key"], Sector> = {
       {
         slug: "gida-urunleri",
         title: "Gıda Ürünleri",
-        text: "Kahvaltılıktan süt ürünlerine, konserveden hazır tatlıya geniş gıda tedariği.",
+        text: "Kahvaltılıktan süt ürünlerine geniş gıda tedariği.",
         icon: "gida",
         image: "/gida/hakkimizda.jpg",
         paragraphs: [
@@ -123,7 +126,7 @@ export const sectors: Record<Sector["key"], Sector> = {
       {
         slug: "temizlik-kagit",
         title: "Temizlik & Kağıt Ürünleri",
-        text: "Türk markalarının deterjan, yüzey temizleyici, kağıt ürünleri, ıslak mendil ve bebek bezi grupları.",
+        text: "Deterjan, kağıt ürünleri, ıslak mendil ve bebek bezi.",
         icon: "temizlik",
         image: "/gida/temizlik-kagit.jpg",
         paragraphs: [
@@ -136,11 +139,7 @@ export const sectors: Record<Sector["key"], Sector> = {
       },
     ],
     heroImage: "/gida/hero-depo.jpg",
-    brands: [
-      { name: "Coca-Cola", logo: "/gida/logo-coca-cola.svg" },
-      { name: "Red Bull", logo: "/gida/logo-red-bull.svg" },
-      { name: "Haribo", logo: "/gida/logo-haribo.svg" },
-    ],
+    hasBrandsPage: true,
     features: [
       { title: "Orijinal Ürün Garantisi", text: "Tüm ürünler yetkili kanallardan, orijinal ve güncel üretim tarihli olarak tedarik edilir.", icon: "garanti" },
       { title: "Hızlı Teklif & Sevkiyat", text: "Talebinize aynı gün fiyat teklifi; stoklu ürünlerde 48 saat içinde sevkiyat planı.", icon: "hiz" },
@@ -153,15 +152,16 @@ export const sectors: Record<Sector["key"], Sector> = {
       { title: "Onay & Tedarik", text: "Onayınızla birlikte ürünler depomuzdan veya üreticiden hazırlanır." },
       { title: "Teslimat", text: "Yurt içi dağıtım veya ihracat yüklemesi planlanan tarihte tamamlanır." },
     ],
+    // Logo renkleri: lacivert (navy-800 #1b2a49) zemin + altın (gold-500 #b8923a) vurgu
     theme: {
-      bg: "bg-[#0f2e1d]",
-      accent: "bg-fresh-500",
-      accentHover: "hover:bg-fresh-700",
-      accentText: "text-fresh-500",
-      iconHover: "group-hover:bg-fresh-500",
-      heroFrom: "from-[#0f2e1d]/95",
-      soft: "bg-[#f1f8f3]",
-      ring: "focus:ring-fresh-500/30",
+      bg: "bg-navy-800",
+      accent: "bg-gold-500",
+      accentHover: "hover:bg-gold-600",
+      accentText: "text-gold-500",
+      iconHover: "group-hover:bg-gold-500",
+      heroFrom: "from-navy-800/95",
+      soft: "bg-gold-50",
+      ring: "focus:ring-gold-500/30",
     },
   },
   muhendislik: {

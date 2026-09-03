@@ -14,6 +14,7 @@ export function SectorFooter({ sector }: { sector: Sector }) {
     ...(sector.hasAboutPage
       ? [{ href: `${sector.base}/hakkimizda`, label: "Hakkımızda" }]
       : []),
+    ...(sector.hasBrandsPage ? [{ href: `${sector.base}/markalar`, label: "Markalar" }] : []),
     { href: `${sector.base}/iletisim`, label: "İletişim" },
     { href: `${sector.base}/teklif`, label: "Teklif Al" },
   ];

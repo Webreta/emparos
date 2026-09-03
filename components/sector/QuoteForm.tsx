@@ -15,7 +15,7 @@ export function QuoteForm({ sector }: { sector: Sector }) {
 
   if (state.ok) {
     return (
-      <div className="rounded-[28px] border border-ink/10 bg-[#f7f7f4] p-8 text-center">
+      <div className="rounded-2xl border border-ink/10 bg-[#f7f7f4] p-8 text-center">
         <span className={`mx-auto flex size-14 items-center justify-center rounded-full ${theme.accent} text-white`}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-7" aria-hidden="true">
             <path d="M20 6 9 17l-5-5" />
@@ -30,7 +30,7 @@ export function QuoteForm({ sector }: { sector: Sector }) {
   }
 
   return (
-    <form action={formAction} className="rounded-[28px] border border-ink/10 bg-[#f7f7f4] p-6 shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] sm:p-8">
+    <form action={formAction} className="rounded-2xl border border-ink/10 bg-[#f7f7f4] p-6 shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] sm:p-8">
       <input type="hidden" name="sector" value={sector.key} />
       {/* Bot tuzağı: görünmez alan, dolarsa istek reddedilir */}
       <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />

@@ -22,7 +22,12 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return { title: cat ? `${cat.name} | ${item!.title}` : sector.name };
 }
 
-export default async function Page({ params }: { params: Params }) {
+type SearchParams = Promise<{ k?: string }>;
+
+// ?k=slug,slug → filtrede çoklu seçim (CategoryFilter bileşeni yazar)
+export default async function Page({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { slug, kategori } = await params;
-  return <SectorCategoryPage sector={sector} slug={slug} category={kategori} />;
+  const { k } = await searchParams;
+  const selected = k ? k.split(",").filter(Boolean) : [];
+  return <SectorCategoryPage sector={sector} slug={slug} category={kategori} selected={selected} />;
 }

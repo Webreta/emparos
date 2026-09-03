@@ -12,3 +12,6 @@ next-env.d.ts
 # Kisisel Claude Code izinleri ve Word gecici dosyalari
 .claude/settings.local.json
 ~$*
+
+# Tasarım ekran görüntüleri ve ham kaynak görseller (repoya girmez)
+görseller/
