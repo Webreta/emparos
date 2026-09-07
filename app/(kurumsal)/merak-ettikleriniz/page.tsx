@@ -1,37 +1,23 @@
 import type { Metadata } from "next";
 import { CoverPage } from "@/components/site/CoverPage";
+import { getLocale } from "@/lib/i18n/server";
+import { ui } from "@/lib/i18n/ui";
+import { coverContent } from "@/lib/i18n/content";
 
-export const metadata: Metadata = { title: "Merak Ettikleriniz" };
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return { title: ui[locale].cover.faqTitle };
+}
 
-// Sık sorulan sorular: içerik panelden yönetilir hale getirilecek
-const faqs = [
-  {
-    q: "Emparos Global hangi alanlarda hizmet veriyor?",
-    a: "Üç ana iş kolumuz var: Kraftora Pack markamızla ambalaj çözümleri, Emparos Gıda ile gıda-içecek ve temizlik ürünleri tedariki, Emparos Mühendislik ile yönetim ve mühendislik danışmanlığı.",
-  },
-  {
-    q: "Ambalaj siparişleri için nereye başvurmalıyım?",
-    a: "Ambalaj çözümleri Kraftora Pack bünyesinde yürütülür; kraftorapack.com üzerinden ürünleri inceleyebilir ve teklif talep edebilirsiniz.",
-  },
-  {
-    q: "Gıda ve içecek ürünlerinde minimum sipariş miktarı var mı?",
-    a: "Ürün grubuna ve markaya göre değişir. İhtiyacınızı iletişim formundan paylaşın, ekibimiz size özel teklif hazırlasın.",
-  },
-  {
-    q: "Yurt dışına tedarik yapıyor musunuz?",
-    a: "Evet. Global tedarik ağımızla ihracat ve ithalat süreçlerinde uçtan uca destek veriyoruz.",
-  },
-  {
-    q: "Mühendislik danışmanlığı süreci nasıl işliyor?",
-    a: "Önce ücretsiz ön görüşme ve ihtiyaç analizi yapılır; ardından kapsam, süre ve çıktıların netleştiği bir teklif sunulur. Proje boyunca düzenli raporlama yapılır.",
-  },
-];
-
-export default function FaqPage() {
+// Sık sorulan sorular: içerik lib/i18n/content*.ts içinde, panelden yönetilir hale getirilecek
+export default async function FaqPage() {
+  const locale = await getLocale();
+  const t = ui[locale].cover;
+  const { faq } = coverContent(locale);
   return (
-    <CoverPage eyebrow="Sık Sorulan Sorular" title="Merak Ettikleriniz">
+    <CoverPage eyebrow={t.faqEyebrow} title={t.faqTitle}>
       <div className="space-y-3">
-        {faqs.map((f, i) => (
+        {faq.map((f, i) => (
           <details
             key={f.q}
             open={i === 0}

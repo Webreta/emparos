@@ -1,6 +1,11 @@
 node_modules
 .next
 out
+
+# Ortam değişkenleri (yalnızca .env.example repoda kalır)
+.env
+.env.*
+!.env.example
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store

@@ -1,13 +1,15 @@
 import { site } from "@/lib/site";
+import { ui } from "@/lib/i18n/ui";
+import type { Locale } from "@/lib/i18n/config";
 
 // Sağ altta sabit WhatsApp butonu
-export function FloatButtons() {
+export function FloatButtons({ locale }: { locale: Locale }) {
   return (
     <a
       href={site.whatsappHref}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="WhatsApp ile yazın"
+      aria-label={ui[locale].float.whatsapp}
       className="fixed bottom-5 right-5 z-50 flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:scale-105"
     >
       <svg viewBox="0 0 24 24" fill="currentColor" className="size-7">

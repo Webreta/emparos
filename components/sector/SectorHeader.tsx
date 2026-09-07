@@ -6,21 +6,26 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import type { Sector } from "@/lib/sectors";
 import { site } from "@/lib/site";
+import { ui } from "@/lib/i18n/ui";
+import type { Locale } from "@/lib/i18n/config";
+import { LangSwitcher } from "@/components/site/LangSwitcher";
 
 // Alt site header'ı: her sektör kendi rengi ve menüsüyle ayrı bir siteymiş gibi.
 // Ege Yatçılık tarzı üstten sarkan, alt köşeleri oval kart; ancak opak ve sektör renginde.
-export function SectorHeader({ sector }: { sector: Sector }) {
+// `sector` dil bazlı yerelleştirilmiş olarak gelir (localizeSector).
+export function SectorHeader({ sector, locale }: { sector: Sector; locale: Locale }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { theme } = sector;
+  const t = ui[locale];
 
   const quoteHref = `${sector.base}/teklif`;
   const nav = [
-    { href: sector.base, label: "Ana Sayfa", exact: true },
+    { href: sector.base, label: t.nav.home, exact: true },
     { href: `${sector.base}#urunler`, label: sector.itemsLabel, dropdown: true },
-    ...(sector.hasAboutPage ? [{ href: `${sector.base}/hakkimizda`, label: "Hakkımızda" }] : []),
-    ...(sector.hasBrandsPage ? [{ href: `${sector.base}/markalar`, label: "Markalar" }] : []),
-    { href: `${sector.base}/iletisim`, label: "İletişim" },
+    ...(sector.hasAboutPage ? [{ href: `${sector.base}/hakkimizda`, label: t.nav.about }] : []),
+    ...(sector.hasBrandsPage ? [{ href: `${sector.base}/markalar`, label: t.nav.brands }] : []),
+    { href: `${sector.base}/iletisim`, label: t.nav.contact },
   ];
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href.split("#")[0]) && !exact && href !== sector.base;
@@ -28,17 +33,18 @@ export function SectorHeader({ sector }: { sector: Sector }) {
   return (
     <header className="fixed inset-x-0 top-0 z-40">
       <div className={`mx-auto max-w-7xl rounded-b-[2.5rem] border-x border-b border-white/20 ${theme.bg} text-white shadow-xl shadow-black/20 ring-1 ring-inset ring-white/5`}>
-        {/* Üst bar: ana siteye dönüş + iletişim */}
+        {/* Üst bar: ana siteye dönüş + iletişim + dil seçici */}
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-1.5 text-xs text-white/70">
           <Link href="/" className="flex items-center gap-1.5 hover:text-white">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-3.5">
               <path d="m15 18-6-6 6-6" />
             </svg>
-            Emparos Global
+            {t.nav.mainSite}
           </Link>
           <div className="flex items-center gap-4">
-            <a href={site.phoneHref} className="hover:text-white">{site.phone}</a>
-            <a href={`mailto:${site.email}`} className="hidden hover:text-white sm:inline">{site.email}</a>
+            <a href={site.phoneHref} className="hidden hover:text-white sm:inline">{site.phone}</a>
+            <a href={`mailto:${site.email}`} className="hidden hover:text-white md:inline">{site.email}</a>
+            <LangSwitcher current={locale} />
           </div>
         </div>
 
@@ -92,14 +98,14 @@ export function SectorHeader({ sector }: { sector: Sector }) {
               href={quoteHref}
               className={`ml-2 rounded-lg ${theme.accent} ${theme.accentHover} px-4 py-2 text-sm font-bold text-white transition`}
             >
-              Teklif Al
+              {t.nav.quoteShort}
             </Link>
           </nav>
 
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            aria-label="Menü"
+            aria-label={t.nav.menu}
             aria-expanded={open}
             className="rounded-lg p-2 text-white lg:hidden"
           >
@@ -133,7 +139,7 @@ export function SectorHeader({ sector }: { sector: Sector }) {
                 onClick={() => setOpen(false)}
                 className={`mt-3 rounded-lg ${theme.accent} px-4 py-2.5 text-center text-base font-bold text-white`}
               >
-                Teklif Al
+                {t.nav.quoteShort}
               </Link>
             </div>
           </nav>

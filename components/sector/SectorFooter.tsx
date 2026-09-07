@@ -3,20 +3,23 @@ import Image from "next/image";
 import type { Sector } from "@/lib/sectors";
 import { site } from "@/lib/site";
 import { SectorIcon } from "@/components/sector/icons";
+import { ui } from "@/lib/i18n/ui";
+import type { Locale } from "@/lib/i18n/config";
 
 // Alt site footer'ı: tam genişlik, koyu sektör zemini.
-// Marka bloğu + ürün grupları + hızlı linkler + ikonlu iletişim.
-export function SectorFooter({ sector }: { sector: Sector }) {
+// Marka bloğu + hızlı linkler + ikonlu iletişim. `sector` yerelleştirilmiş gelir.
+export function SectorFooter({ sector, locale }: { sector: Sector; locale: Locale }) {
   const { theme } = sector;
+  const t = ui[locale];
   const quick = [
-    { href: sector.base, label: "Ana Sayfa" },
+    { href: sector.base, label: t.nav.home },
     { href: `${sector.base}#urunler`, label: sector.itemsLabel },
     ...(sector.hasAboutPage
-      ? [{ href: `${sector.base}/hakkimizda`, label: "Hakkımızda" }]
+      ? [{ href: `${sector.base}/hakkimizda`, label: t.nav.about }]
       : []),
-    ...(sector.hasBrandsPage ? [{ href: `${sector.base}/markalar`, label: "Markalar" }] : []),
-    { href: `${sector.base}/iletisim`, label: "İletişim" },
-    { href: `${sector.base}/teklif`, label: "Teklif Al" },
+    ...(sector.hasBrandsPage ? [{ href: `${sector.base}/markalar`, label: t.nav.brands }] : []),
+    { href: `${sector.base}/iletisim`, label: t.nav.contact },
+    { href: `${sector.base}/teklif`, label: t.nav.quoteShort },
   ];
   const contact = [
     { icon: "telefon" as const, label: site.phone, href: site.phoneHref },
@@ -38,7 +41,7 @@ export function SectorFooter({ sector }: { sector: Sector }) {
 
       <div className="relative mx-auto grid max-w-7xl gap-12 px-5 pb-12 pt-16 lg:grid-cols-12 lg:gap-8 lg:px-8">
         {/* Marka */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-6">
           <Link href={sector.base} className="inline-flex items-center gap-3">
             <Image
               src="/logo-white.png"
@@ -64,7 +67,7 @@ export function SectorFooter({ sector }: { sector: Sector }) {
               href={`${sector.base}/teklif`}
               className={`inline-flex items-center gap-2 rounded-full ${theme.accent} ${theme.accentHover} px-5 py-2.5 text-sm font-bold text-white transition`}
             >
-              Teklif Al
+              {t.nav.quoteShort}
               <ArrowIcon />
             </Link>
             <a
@@ -79,23 +82,9 @@ export function SectorFooter({ sector }: { sector: Sector }) {
           </div>
         </div>
 
-        {/* Ürün grupları */}
-        <div className="lg:col-span-2">
-          <FooterHeading>{sector.itemsLabel}</FooterHeading>
-          <ul className="mt-5 space-y-3">
-            {sector.items.map((it) => (
-              <li key={it.slug}>
-                <FooterLink href={`${sector.base}/${it.slug}`}>
-                  {it.title}
-                </FooterLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Hızlı linkler */}
-        <div className="lg:col-span-2">
-          <FooterHeading>Hızlı Erişim</FooterHeading>
+        {/* Hızlı linkler (ürün grubu/hizmet listesi footer'da gösterilmez) */}
+        <div className="lg:col-span-3 lg:col-start-7">
+          <FooterHeading>{t.footer.quick}</FooterHeading>
           <ul className="mt-5 space-y-3">
             {quick.map((q) => (
               <li key={q.href}>
@@ -107,7 +96,7 @@ export function SectorFooter({ sector }: { sector: Sector }) {
 
         {/* İletişim */}
         <div className="lg:col-span-3">
-          <FooterHeading>İletişim</FooterHeading>
+          <FooterHeading>{t.footer.contact}</FooterHeading>
           <ul className="mt-5 space-y-3">
             {contact.map((c) => {
               const inner = (
@@ -160,7 +149,7 @@ export function SectorFooter({ sector }: { sector: Sector }) {
             >
               <path d="m15 18-6-6 6-6" />
             </svg>
-            Emparos Global ana sayfa
+            {t.footer.mainSite}
           </Link>
         </div>
       </div>

@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+.git
+.env
+.env.*
+!.env.example
+görseller
+dosyalar
+.claude
+*.md
+.pgsql
+.pgdata
+public/uploads

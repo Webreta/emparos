@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
 import { CoverPage } from "@/components/site/CoverPage";
-import { divisions } from "@/lib/divisions";
+import { getLocale } from "@/lib/i18n/server";
+import { ui } from "@/lib/i18n/ui";
+import { localizeDivisions } from "@/lib/i18n/content";
 
-export const metadata: Metadata = { title: "Sektörler" };
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return { title: ui[locale].cover.sectorsTitle };
+}
 
-export default function SectorsPage() {
+export default async function SectorsPage() {
+  const locale = await getLocale();
+  const t = ui[locale].cover;
+  const divisions = localizeDivisions(locale);
   return (
-    <CoverPage eyebrow="Üç iş kolu, tek güvenilir ortak" title="Sektörler" wide>
+    <CoverPage eyebrow={t.sectorsEyebrow} title={t.sectorsTitle} wide>
       <div className="grid gap-5 lg:grid-cols-3">
         {divisions.map((d) => (
           <a
@@ -20,14 +28,6 @@ export default function SectorsPage() {
             <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-white/60">{d.subtitle}</p>
             <h2 className="mt-1 text-xl font-bold">{d.title}</h2>
             <p className="mt-2 text-sm leading-relaxed text-white/80">{d.text}</p>
-            <ul className="mt-4 space-y-1.5 text-sm text-white/85">
-              {d.items.map((it) => (
-                <li key={it} className="flex items-center gap-2">
-                  <span className={`size-1.5 rounded-full ${d.accent}`} />
-                  {it}
-                </li>
-              ))}
-            </ul>
             <span className="mt-6 inline-flex items-center gap-2 text-sm font-bold transition group-hover:gap-3">
               {d.cta} →
             </span>

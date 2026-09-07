@@ -1,4 +1,5 @@
-# Prod imajı — Next.js standalone çıktı
+# Prod imajı — Next.js standalone çıktı (Easypanel: Dockerfile build, port 3000)
+# Ortam değişkenleri (DATABASE_URL vb.) çalışma anında Easypanel'den verilir; build DB'ye bağlanmaz.
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -17,7 +18,9 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
-COPY --from=builder /app/public ./public
+# public/ yazılabilir olmalı: panel yüklemeleri public/uploads altına gider (Easypanel'de /app/public/uploads volume olarak bağlanır)
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+RUN mkdir -p ./public/uploads && chown -R nextjs:nodejs ./public/uploads
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 

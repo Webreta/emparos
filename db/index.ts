@@ -2,9 +2,11 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL tanımlı değil (.env dosyasına ekleyin)");
+// Build sırasında (Docker imajı) DATABASE_URL yoktur; postgres.js bağlantıyı ilk sorguda kurduğu için
+// burada fırlatmak yerine uyarı verip yer tutucu adresle devam edilir. Çalışma anında değişken zorunludur.
+const connectionString = process.env.DATABASE_URL || "postgres://localhost:5432/emparos";
+if (!process.env.DATABASE_URL) {
+  console.warn("DATABASE_URL tanımlı değil; veritabanı sorguları çalışma anında başarısız olur.");
 }
 
 // Tek uzun ömürlü Node süreci — global cache ile dev'de hot-reload'da

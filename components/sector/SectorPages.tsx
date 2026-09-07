@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -6,15 +5,20 @@ import type { Sector } from "@/lib/sectors";
 import { site } from "@/lib/site";
 import { SectorIcon, type SectorIconKey } from "@/components/sector/icons";
 import { QuoteForm } from "@/components/sector/QuoteForm";
-import { CategoryFilter, type FilterGroup } from "@/components/sector/CategoryFilter";
+import type { FilterGroup } from "@/components/sector/CategoryFilter";
+import { ProductCatalog, type CatalogProduct } from "@/components/sector/ProductCatalog";
 import { BrandGrid } from "@/components/sector/BrandGrid";
 import { markalar } from "@/lib/gida-markalar";
+import { ui } from "@/lib/i18n/ui";
+import type { Locale } from "@/lib/i18n/config";
 
 // Alt site sayfa şablonları. İki sektör de aynı iskeleti kullanır,
 // renk/metin/menü farkı `sector` nesnesinden gelir.
 
-export function SectorHome({ sector }: { sector: Sector }) {
+// Tüm şablonlar `sector`'ü yerelleştirilmiş (localizeSector) alır; arayüz metinleri ui[locale]'den gelir.
+export function SectorHome({ sector, locale }: { sector: Sector; locale: Locale }) {
   const { theme } = sector;
+  const t = ui[locale];
   // Ana sayfa logo kaydırağı: logosu olan markalardan en fazla 30 tanesi (ürün sayısına göre)
   const brands = sector.hasBrandsPage ? markalar().filter((b) => b.logo).slice(0, 30) : [];
   return (
@@ -48,7 +52,7 @@ export function SectorHome({ sector }: { sector: Sector }) {
               {sector.itemsLabel}
             </a>
             <Link href={`${sector.base}/teklif`} className="rounded-full border border-white/30 px-6 py-3 text-sm font-bold hover:bg-white/10">
-              Teklif Alın
+              {t.home.quoteBtn}
             </Link>
           </div>
         </div>
@@ -86,117 +90,82 @@ export function SectorHome({ sector }: { sector: Sector }) {
       {/* Ürün / hizmet grupları */}
       <section id="urunler" className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
         <h2 className="text-3xl font-bold text-ink">{sector.itemsLabel}</h2>
-        {/* 2'li dizilim; her kartın üstünde 3:1 banner alanı (görsel gelene kadar boş yer tutucu; `banner` alanı dolunca görsel basılır) */}
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
-          {sector.items.map((it) => (
+        {/* Sektör koyu zeminli ikonlu kartlar. 4 grup → 4'lü tek satır (Gıda); diğer sayılar → 2'li satırlar,
+            tek kalan son kart satırda ortalanır (Mühendislik: 2-2-2-1). Banner görseli kullanılmıyor. */}
+        <div className={`mt-10 grid gap-6 sm:grid-cols-2 ${sector.items.length === 4 ? "lg:grid-cols-4" : ""}`}>
+          {sector.items.map((it, i) => (
             <Link
               key={it.slug}
               href={`${sector.base}/${it.slug}`}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-ink/10 bg-[#f7f7f4] shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:bg-white hover:shadow-[0_24px_60px_-24px_rgba(23,32,51,0.25)]"
+              className={`group flex flex-col rounded-2xl ${theme.bg} p-7 text-white shadow-[0_12px_36px_-14px_rgba(27,42,73,0.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_64px_-24px_rgba(27,42,73,0.6)] ${
+                sector.items.length !== 4 && sector.items.length % 2 === 1 && i === sector.items.length - 1
+                  ? "sm:col-span-2 sm:w-[calc(50%-0.75rem)] sm:justify-self-center"
+                  : ""
+              }`}
             >
-              <div className="relative aspect-[3/1] w-full overflow-hidden bg-navy-50">
-                {it.banner ? (
-                  <Image
-                    src={it.banner}
-                    alt={it.title}
-                    fill
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    className="object-cover transition duration-700 group-hover:scale-105"
-                  />
-                ) : (
-                  <span className="flex h-full items-center justify-center text-xs font-semibold uppercase tracking-widest text-navy-300">
-                    Görsel gelecek
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-1 flex-col p-8">
-              <h3 className="text-[22px] font-bold tracking-tight text-ink">{it.title}</h3>
-              <p className="mt-3 flex-1 truncate text-[15px] leading-relaxed text-ink/80" title={it.text}>{it.text}</p>
-              <span className="mt-7 inline-flex items-center gap-2 self-start rounded-full border border-ink bg-white px-4 py-2 text-sm font-semibold text-ink transition duration-300 group-hover:bg-ink group-hover:text-white">
-                İncele
+              {/* İkon kutusuz, doğrudan vurgu renginde; hover'da beyaza döner */}
+              {it.icon ? (
+                <SectorIcon name={it.icon} className={`size-12 ${theme.accentText} transition duration-300 group-hover:text-white`} />
+              ) : (
+                <span className={`block h-1.5 w-10 rounded-full ${theme.accent}`} />
+              )}
+              <h3 className="mt-5 text-lg font-bold tracking-tight">{it.title}</h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-white/70">{it.text}</p>
+              <span className="mt-6 inline-flex items-center gap-2 self-start rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-ink">
+                {t.home.explore}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4 transition group-hover:translate-x-0.5" aria-hidden="true">
                   <path d="M5 12h14" />
                   <path d="m12 5 7 7-7 7" />
                 </svg>
               </span>
-              </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Tedarik süreci */}
-      {sector.process && (
+      {/* Neden biz: koyu (lacivert) zeminli bölüm, üzerinde açık kartlar. ("Nasıl Çalışıyoruz" bölümü kaldırıldı.) */}
+      {sector.features && (
         <section className={`${theme.bg} px-5 py-20 text-white lg:px-8`}>
           <div className="mx-auto max-w-7xl">
-            <h2 className="text-3xl font-bold">Nasıl Çalışıyoruz?</h2>
-            {/* Soldan sağa akış: kart → ok → kart. Mobilde dikey, oklar aşağı bakar. */}
-            <div className="mt-10 flex flex-col items-stretch gap-3 lg:flex-row lg:items-stretch">
-              {sector.process.map((step, i) => (
-                <Fragment key={step.title}>
-                  {i > 0 && (
-                    <span className="flex shrink-0 items-center justify-center py-1 text-white/50 lg:px-1">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="size-6 rotate-90 lg:rotate-0" aria-hidden="true">
-                        <path d="M5 12h14" />
-                        <path d="m12 5 7 7-7 7" />
-                      </svg>
-                    </span>
+            <h2 className="text-3xl font-bold">{t.home.why(sector.name)}</h2>
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {sector.features.map((f) => (
+                <div
+                  key={f.title}
+                  className="group rounded-2xl border border-white/10 bg-white p-7 text-ink shadow-[0_12px_36px_-14px_rgba(0,0,0,0.4)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_64px_-24px_rgba(0,0,0,0.5)]"
+                >
+                  {/* İkon kutusuz, koyu sektör renginde (lacivert) */}
+                  {f.icon ? (
+                    <SectorIcon name={f.icon} className="size-12 text-navy-800" />
+                  ) : (
+                    <span className={`block h-1.5 w-10 rounded-full ${theme.accent}`} />
                   )}
-                  <div className="flex flex-1 flex-col rounded-2xl border border-white/25 p-7 transition hover:border-white/50 hover:bg-white/5">
-                    <span className={`flex size-10 items-center justify-center rounded-full ${theme.accent} text-sm font-bold`}>
-                      {i + 1}
-                    </span>
-                    <h3 className="mt-5 text-lg font-bold">{step.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-white/70">{step.text}</p>
-                  </div>
-                </Fragment>
+                  <h3 className="mt-5 text-lg font-bold tracking-tight text-ink">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink/80">{f.text}</p>
+                </div>
               ))}
             </div>
           </div>
         </section>
       )}
 
-      {/* Neden biz */}
-      {sector.features && (
-        <section className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
-          <h2 className="text-3xl font-bold text-ink">Neden {sector.name}?</h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {sector.features.map((f) => (
-              <div
-                key={f.title}
-                className="group rounded-2xl border border-ink/10 bg-[#f7f7f4] p-7 shadow-[0_8px_30px_-12px_rgba(23,32,51,0.12)] transition duration-300 hover:-translate-y-1 hover:border-ink/20 hover:bg-white hover:shadow-[0_24px_60px_-24px_rgba(23,32,51,0.25)]"
-              >
-                {f.icon ? (
-                  <span className={`flex size-14 items-center justify-center rounded-2xl bg-white ${theme.accentText} shadow-sm ring-1 ring-black/5 transition duration-300 ${theme.iconHover} group-hover:text-white`}>
-                    <SectorIcon name={f.icon} className="size-7" />
-                  </span>
-                ) : (
-                  <span className={`block h-1.5 w-10 rounded-full ${theme.accent}`} />
-                )}
-                <h3 className="mt-5 text-lg font-bold tracking-tight text-ink">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink/80">{f.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <SectorCta sector={sector} />
+      <SectorCta sector={sector} locale={locale} />
     </>
   );
 }
 
 // Ana sayfa ve tüm iç sayfaların altında ortak çağrı bloğu.
-export function SectorCta({ sector }: { sector: Sector }) {
+export function SectorCta({ sector, locale }: { sector: Sector; locale: Locale }) {
   const { theme } = sector;
+  const t = ui[locale].cta;
   return (
     <section className={`${theme.soft} px-5 py-20 lg:px-8`}>
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-3xl font-bold text-ink">İhtiyacınızı konuşalım</h2>
-        <p className="mt-3 text-ink/80">Size özel teklif için formu doldurun ya da WhatsApp üzerinden hemen yazın.</p>
+        <h2 className="text-3xl font-bold text-ink">{t.title}</h2>
+        <p className="mt-3 text-ink/80">{t.text}</p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <Link href={`${sector.base}/teklif`} className={`rounded-full ${theme.accent} ${theme.accentHover} px-6 py-3 text-sm font-bold text-white transition`}>
-            Teklif Formu
+            {t.formBtn}
           </Link>
           <a
             href={site.whatsappHref}
@@ -204,7 +173,7 @@ export function SectorCta({ sector }: { sector: Sector }) {
             rel="noopener noreferrer"
             className="rounded-full border border-ink bg-white px-6 py-3 text-sm font-bold text-ink transition hover:bg-ink hover:text-white"
           >
-            WhatsApp
+            {t.whatsapp}
           </a>
         </div>
       </div>
@@ -227,9 +196,21 @@ function CardIcon({ sector, name, size = "md" }: { sector: Sector; name: SectorI
   );
 }
 
-export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string }) {
+// Hizmet sayfası metin arası görseli (16:9, yuvarlak köşe)
+function ItemFigure({ src, alt }: { src: string; alt: string }) {
+  return (
+    <figure className="!mb-8 overflow-hidden rounded-2xl border border-ink/10 shadow-[0_12px_36px_-14px_rgba(23,32,51,0.3)]">
+      <div className="relative aspect-[16/9] w-full bg-navy-50">
+        <Image src={src} alt={alt} fill sizes="(min-width: 1024px) 60vw, 100vw" className="object-cover" />
+      </div>
+    </figure>
+  );
+}
+
+export function SectorItemPage({ sector, slug, locale }: { sector: Sector; slug: string; locale: Locale }) {
   const item = sector.items.find((i) => i.slug === slug);
   if (!item) notFound();
+  const t = ui[locale].item;
   return (
     <>
       <SectorPageHero sector={sector} title={item.title} text={item.text} image={item.image} />
@@ -238,12 +219,36 @@ export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string 
           {/* Ürün listesi olan sayfalarda giriş metni gösterilmez, doğrudan kategoriler gelir */}
           {!item.products && (
             <div className="space-y-4 text-[17px] leading-relaxed text-ink/80">
-              {item.paragraphs ? item.paragraphs.map((p) => <p key={p}>{p}</p>) : <p>{item.text}</p>}
+              {/* Tek görsel, metnin başında */}
+              {item.gallery?.[0] && <ItemFigure {...item.gallery[0]} />}
+              {(item.paragraphs ?? [item.text]).map((p) => (
+                <p key={p}>{p}</p>
+              ))}
+
+              {item.scope && (
+                <div className="!mt-10">
+                  <h2 className="text-xl font-bold tracking-tight text-ink">{t.scope}</h2>
+                  {/* Her madde ayrı kutu: solda koyu zeminli onay ikonu, sağda metin; 2 sütun */}
+                  <ul className="mt-5 grid gap-3 text-[15px] sm:grid-cols-2">
+                    {item.scope.map((s) => (
+                      <li
+                        key={s}
+                        className={`flex items-center gap-3 rounded-xl border ${sector.theme.lineSoft} bg-white p-4 leading-snug text-ink transition duration-300 ${sector.theme.lineHover} hover:shadow-[0_16px_40px_-20px_rgba(27,42,73,0.35)]`}
+                      >
+                        <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${sector.theme.bg} text-white`}>
+                          <SectorIcon name="onay" className="size-4" />
+                        </span>
+                        <span>{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
           {item.products && (
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-ink">{item.productsLabel ?? "Ürünler"}</h2>
+              <h2 className="text-2xl font-bold tracking-tight text-ink">{item.productsLabel ?? t.products}</h2>
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
                 {item.products.map((p) => {
                   const hasList = !!p.products?.length;
@@ -254,7 +259,7 @@ export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string 
                         <p className="mt-2 truncate text-sm leading-relaxed text-ink/80" title={p.desc}>{p.desc}</p>
                       </div>
                       <span className="mt-5 inline-flex items-center gap-2 self-start rounded-full border border-ink bg-white px-4 py-2 text-sm font-semibold text-ink transition duration-300 group-hover:bg-ink group-hover:text-white">
-                        Ürünleri Gör
+                        {t.viewProducts}
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4 transition group-hover:translate-x-0.5" aria-hidden="true">
                           <path d="M5 12h14" />
                           <path d="m12 5 7 7-7 7" />
@@ -306,13 +311,20 @@ export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string 
 
           {/* Teklif kartı */}
           <div className={`rounded-2xl ${sector.theme.bg} p-7 text-white`}>
-            <p className="text-lg font-bold">Bu ürün grubu için teklif alın</p>
-            <p className="mt-2 text-sm leading-relaxed text-white/70">Adet ve teslimat noktasını iletin, aynı gün fiyat teklifiyle dönelim.</p>
+            {(() => {
+              const q = sector.key === "muhendislik" ? t.quoteEng : t.quoteFood;
+              return (
+                <>
+                  <p className="text-lg font-bold">{q.title}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-white/70">{q.text}</p>
+                </>
+              );
+            })()}
             <Link
               href={`${sector.base}/teklif`}
               className={`mt-5 inline-flex items-center gap-2 rounded-full ${sector.theme.accent} ${sector.theme.accentHover} px-5 py-2.5 text-sm font-bold text-white transition`}
             >
-              Teklif Formu
+              {t.formBtn}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4" aria-hidden="true">
                 <path d="M5 12h14" />
                 <path d="m12 5 7 7-7 7" />
@@ -321,7 +333,7 @@ export function SectorItemPage({ sector, slug }: { sector: Sector; slug: string 
           </div>
         </aside>
       </section>
-      <SectorCta sector={sector} />
+      <SectorCta sector={sector} locale={locale} />
     </>
   );
 }
@@ -333,11 +345,13 @@ export function SectorCategoryPage({
   slug,
   category,
   selected = [],
+  locale,
 }: {
   sector: Sector;
   slug: string;
   category: string;
   selected?: string[];
+  locale: Locale;
 }) {
   const item = sector.items.find((i) => i.slug === slug);
   const cat = item?.products?.find((p) => p.slug === category);
@@ -358,122 +372,75 @@ export function SectorCategoryPage({
   const active = selected.filter((k) => allCats.includes(k));
   const chosen = hepsi ? allCats : active.length ? active : [cat.slug];
 
-  // Seçili kategorilerin ürünleri birleştirilir, Türkçe alfabetik sıralanır
-  const chosenCats = sector.items.flatMap((it) => (it.products ?? []).filter((c) => chosen.includes(c.slug)));
-  const products = chosenCats
-    .flatMap((c) => c.products ?? [])
+  // Sektörün bütün ürünleri düz listeye açılır (arama tüm ürünlerde çalışır), Türkçe alfabetik sıralanır.
+  // Listeleme/arama mantığı client tarafında ProductCatalog içinde.
+  const all: CatalogProduct[] = sector.items
+    .flatMap((it) => (it.products ?? []).flatMap((c) => (c.products ?? []).map((p) => ({ ...p, cat: c.slug, catName: c.name }))))
     .sort((a, b) => a.name.localeCompare(b.name, "tr"));
+  const chosenNames = sector.items.flatMap((it) => (it.products ?? []).filter((c) => chosen.includes(c.slug)).map((c) => c.name));
 
   return (
     <>
       <SectorPageHero sector={sector} title={cat.name} text={cat.desc} image={item.image} />
-      <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-4 lg:px-8">
-        <aside className="self-start lg:sticky lg:top-28">
-          <CategoryFilter groups={groups} selected={hepsi ? [] : chosen} accent={sector.theme.accent} />
-        </aside>
-
-        {/* Ürünler */}
-        <div className="lg:col-span-3">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight text-ink">{hepsi ? "Tüm Ürünler" : "Ürünler"}</h2>
-              {!hepsi && chosenCats.length > 1 && (
-                <p className="mt-1 text-sm text-ink/70">{chosenCats.map((c) => c.name).join(" · ")}</p>
-              )}
-            </div>
-            <p className="text-sm text-ink/70">{products.length} ürün</p>
-          </div>
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((p) => (
-              // Aynı ad birden fazla üründe geçebilir (varyantlar); görsel yolu slug tabanlı ve benzersiz
-              <div key={p.image} className="group flex flex-col overflow-hidden rounded-lg border border-navy-800 bg-white transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-20px_rgba(27,42,73,0.35)]">
-                <div className="relative aspect-square w-full bg-white">
-                  <Image
-                    src={p.image}
-                    alt={p.name}
-                    fill
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-contain p-6 transition duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="border-t border-navy-800/20 px-4 py-3.5">
-                  <h3 className="text-center text-sm font-normal leading-snug text-ink/80">{p.name}</h3>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      <SectorCta sector={sector} />
+      <ProductCatalog
+        groups={groups}
+        selected={hepsi ? [] : chosen}
+        accent={sector.theme.accent}
+        all={all}
+        chosen={chosen}
+        hepsi={hepsi}
+        chosenNames={chosenNames}
+        locale={locale}
+      />
+      <SectorCta sector={sector} locale={locale} />
     </>
   );
 }
 
 // Markalar sayfası: tedarik edilen tüm markalar, logo veya baş harf kartlarıyla (arama kutulu grid).
-export function SectorBrandsPage({ sector }: { sector: Sector }) {
+export function SectorBrandsPage({ sector, locale }: { sector: Sector; locale: Locale }) {
   const liste = markalar();
+  const t = ui[locale].brands;
   return (
     <>
-      <SectorPageHero
-        sector={sector}
-        title="Markalar"
-        text={`Katalogumuzda ${liste.length} markanın gıda, içecek ve temizlik ürünleri yer alıyor. Aradığınız markayı bulamazsanız teklif formundan iletin.`}
-        image={sector.heroImage}
-      />
+      <SectorPageHero sector={sector} title={t.title} text={t.heroText(liste.length)} image={sector.heroImage} />
       <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
-        <BrandGrid brands={liste} />
+        <BrandGrid brands={liste} locale={locale} />
       </section>
-      <SectorCta sector={sector} />
+      <SectorCta sector={sector} locale={locale} />
     </>
   );
 }
 
-// Teklif formu sayfası: solda form, sağda iletişim bilgileri ve süreç özeti.
-export function SectorQuotePage({ sector }: { sector: Sector }) {
+// Teklif formu sayfası: solda form, sağda süreç özeti.
+export function SectorQuotePage({ sector, locale }: { sector: Sector; locale: Locale }) {
+  const t = ui[locale].quote;
   return (
     <>
-      <SectorPageHero
-        sector={sector}
-        title="Teklif Alın"
-        text="Formu doldurun, aynı gün içinde size özel fiyat teklifiyle dönelim."
-      />
+      <SectorPageHero sector={sector} title={t.title} text={t.text} image={sector.heroImage} />
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-3 lg:px-8">
         <div className="lg:col-span-2">
-          <QuoteForm sector={sector} />
+          <QuoteForm sector={sector} locale={locale} />
         </div>
+        {/* Sağ sütun yalnızca süreç özeti (iletişim bilgileri İletişim sayfasında) */}
         <aside className="space-y-8">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-muted">Doğrudan ulaşın</p>
-            <ul className="mt-4 space-y-3 text-sm text-ink/80">
-              <li>
-                <a href={site.phoneHref} className="font-semibold text-ink hover:underline">{site.phone}</a>
-              </li>
-              <li>
-                <a href={`mailto:${site.email}`} className="font-semibold text-ink hover:underline">{site.email}</a>
-              </li>
-              <li>{site.address}</li>
-            </ul>
-            <a
-              href={site.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-full border border-ink bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:bg-ink hover:text-white"
-            >
-              WhatsApp ile yazın
-            </a>
-          </div>
           {sector.process && (
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-muted">Süreç</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted">{t.process}</p>
+              {/* Alt alta ikon kutuları: solda koyu (lacivert) ikon karesi, sağda adım numarası + başlık + açıklama */}
               <ol className="mt-4 space-y-3">
                 {sector.process.map((step, i) => (
-                  <li key={step.title} className="flex gap-3 text-sm">
-                    <span className={`flex size-7 shrink-0 items-center justify-center rounded-full ${sector.theme.accent} text-xs font-bold text-white`}>
-                      {i + 1}
+                  <li
+                    key={step.title}
+                    className={`group flex gap-4 rounded-2xl border ${sector.theme.lineSoft} bg-white p-4 transition duration-300 ${sector.theme.lineHover} hover:shadow-[0_16px_40px_-20px_rgba(27,42,73,0.35)]`}
+                  >
+                    <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${sector.theme.bg} text-white`}>
+                      <SectorIcon name={step.icon ?? "onay"} className="size-5" />
                     </span>
-                    <span>
-                      <span className="block font-semibold text-ink">{step.title}</span>
-                      <span className="text-ink/70">{step.text}</span>
+                    <span className="min-w-0">
+                      <span className={`block text-[11px] font-bold tracking-widest ${sector.theme.accentText}`}>0{i + 1}</span>
+                      <span className="mt-0.5 block text-sm font-bold text-ink">{step.title}</span>
+                      <span className="mt-1 block text-[13px] leading-relaxed text-ink/70">{step.text}</span>
                     </span>
                   </li>
                 ))}
@@ -486,31 +453,46 @@ export function SectorQuotePage({ sector }: { sector: Sector }) {
   );
 }
 
-export function SectorSimplePage({ sector, title, text, children }: { sector: Sector; title: string; text?: string; children?: React.ReactNode }) {
+export function SectorSimplePage({
+  sector,
+  title,
+  text,
+  locale,
+  children,
+}: {
+  sector: Sector;
+  title: string;
+  text?: string;
+  locale: Locale;
+  children?: React.ReactNode;
+}) {
   return (
     <>
       <SectorPageHero sector={sector} title={title} text={text} />
       <section className="mx-auto max-w-4xl px-5 py-16 text-[17px] leading-relaxed text-ink/80 lg:px-8">
         {children ?? <p>Bu sayfanın içeriği tasarım yönlendirmesiyle hazırlanacak.</p>}
       </section>
-      <SectorCta sector={sector} />
+      <SectorCta sector={sector} locale={locale} />
     </>
   );
 }
 
 // İletişim sayfası: ana sayfa kart dilinde üç bilgi kartı + teklif ve WhatsApp yönlendirmesi.
-export function SectorContactPage({ sector }: { sector: Sector }) {
+export function SectorContactPage({ sector, locale }: { sector: Sector; locale: Locale }) {
+  const t = ui[locale].contact;
   const cards: { icon: SectorIconKey; title: string; body: React.ReactNode; href?: string; external?: boolean }[] = [
-    { icon: "telefon", title: "Telefon", body: site.phone, href: site.phoneHref },
-    { icon: "eposta", title: "E-posta", body: site.email, href: `mailto:${site.email}` },
-    { icon: "adres", title: "Adres", body: site.address },
+    { icon: "telefon", title: t.phone, body: site.phone, href: site.phoneHref },
+    { icon: "eposta", title: t.email, body: site.email, href: `mailto:${site.email}` },
+    { icon: "adres", title: t.address, body: site.address },
   ];
   return (
     <>
-      <SectorPageHero sector={sector} title="İletişim" text="Teklif ve bilgi için bize ulaşın. Aynı gün içinde dönüş yapıyoruz." />
+      <SectorPageHero sector={sector} title={t.title} text={t.text} image={sector.heroImage} />
       <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
+        {/* Bilgi kartları: koyu sektör rengi (lacivert) çerçeveli, beyaz zemin */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => {
+            const cls = `group block rounded-2xl border ${sector.theme.line} bg-white p-8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-24px_rgba(27,42,73,0.35)]`;
             const inner = (
               <>
                 <CardIcon sector={sector} name={c.icon} />
@@ -519,11 +501,11 @@ export function SectorContactPage({ sector }: { sector: Sector }) {
               </>
             );
             return c.href ? (
-              <a key={c.title} href={c.href} className={`group block p-8 ${cardClass}`}>
+              <a key={c.title} href={c.href} className={cls}>
                 {inner}
               </a>
             ) : (
-              <div key={c.title} className={`group p-8 ${cardClass}`}>
+              <div key={c.title} className={cls}>
                 {inner}
               </div>
             );
@@ -533,16 +515,14 @@ export function SectorContactPage({ sector }: { sector: Sector }) {
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           {/* Teklif kartı */}
           <div className={`rounded-2xl ${sector.theme.bg} p-8 text-white`}>
-            <p className="text-xs font-bold uppercase tracking-widest text-white/60">Fiyat teklifi</p>
-            <h2 className="mt-3 text-2xl font-bold">Teklif formunu doldurun</h2>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-white/70">
-              İhtiyacınız olan ürün grubu, adet ve teslimat noktasını iletin; ekibimiz size özel fiyat teklifiyle dönsün.
-            </p>
+            <p className="text-xs font-bold uppercase tracking-widest text-white/60">{t.priceQuote}</p>
+            <h2 className="mt-3 text-2xl font-bold">{t.fillTitle}</h2>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-white/70">{t.fillText}</p>
             <Link
               href={`${sector.base}/teklif`}
               className={`mt-6 inline-flex items-center gap-2 rounded-full ${sector.theme.accent} ${sector.theme.accentHover} px-6 py-3 text-sm font-bold text-white transition`}
             >
-              Teklif Formu
+              {t.formBtn}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4" aria-hidden="true">
                 <path d="M5 12h14" />
                 <path d="m12 5 7 7-7 7" />
@@ -550,24 +530,36 @@ export function SectorContactPage({ sector }: { sector: Sector }) {
             </Link>
           </div>
 
-          {/* WhatsApp kartı */}
-          <a href={site.whatsappHref} target="_blank" rel="noopener noreferrer" className={`group block p-8 ${cardClass}`}>
-            <CardIcon sector={sector} name="whatsapp" />
-            <h2 className="mt-6 text-2xl font-bold text-ink">WhatsApp ile hemen yazın</h2>
-            <p className="mt-2 max-w-md text-[15px] leading-relaxed text-ink/80">
-              Hızlı sorularınız için mesaj gönderin, mesai saatleri içinde anında yanıt alın.
-            </p>
-            <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-ink bg-white px-5 py-2.5 text-sm font-semibold text-ink transition duration-300 group-hover:bg-ink group-hover:text-white">
-              Sohbeti başlat
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4" aria-hidden="true">
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
+          {/* WhatsApp kartı: WhatsApp yeşili çerçeve, gerçek WhatsApp simgesi ve yeşil düğme */}
+          <a
+            href={site.whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group block rounded-2xl border-2 border-[#25D366] bg-white p-8 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-24px_rgba(37,211,102,0.5)]"
+          >
+            <span className="flex size-14 items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-[0_8px_24px_-8px_rgba(37,211,102,0.7)]">
+              <WhatsAppGlyph className="size-8" />
+            </span>
+            <p className="mt-6 text-xs font-bold uppercase tracking-widest text-[#128C7E]">WhatsApp</p>
+            <h2 className="mt-2 text-2xl font-bold text-ink">{t.waTitle}</h2>
+            <p className="mt-2 max-w-md text-[15px] leading-relaxed text-ink/80">{t.waText}</p>
+            <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-bold text-white transition duration-300 group-hover:bg-[#1ebe5b]">
+              <WhatsAppGlyph className="size-4" />
+              {site.phone}
             </span>
           </a>
         </div>
       </section>
     </>
+  );
+}
+
+// WhatsApp marka simgesi (dolgulu)
+function WhatsAppGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.2 2.4.9 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3l-1.9-.9c-.3-.1-.5-.2-.6.1l-.9 1.1c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.4-1.5-.9-.8-1.5-1.8-1.6-2.1-.2-.3 0-.4.1-.6l.4-.5.3-.5v-.5l-.8-2c-.2-.5-.4-.5-.7-.5h-.5Z" />
+    </svg>
   );
 }
 

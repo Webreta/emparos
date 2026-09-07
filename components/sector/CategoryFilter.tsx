@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { ui } from "@/lib/i18n/ui";
+import type { Locale } from "@/lib/i18n/config";
 
 // Ürün listesi sayfasının sol filtresi.
 // Ana kategoriler (ürün grupları) akordeon olarak açılır, altındaki alt kategoriler
@@ -18,11 +20,16 @@ export function CategoryFilter({
   groups,
   selected,
   accent,
+  search,
+  locale,
 }: {
   groups: FilterGroup[];
   selected: string[];
   accent: string; // sektör vurgu zemini (örn. bg-gold-500)
+  search?: string; // arama kutusundaki metin; doluysa "Arama" filtresi seçili sayılır, kategoriler devre dışı kalır
+  locale: Locale;
 }) {
+  const t = ui[locale].catalog;
   const router = useRouter();
   const pathname = usePathname();
   // Aynı anda yalnızca bir grup açık. Başlangıçta seçili kategori içeren ilk grup açılır.
@@ -52,25 +59,46 @@ export function CategoryFilter({
   // Tüm filtreleri kaldır: ?k=tumu → sayfa bütün kategorilerin ürünlerini listeler
   const clear = () => router.replace(`${pathname}?k=tumu`, { scroll: false });
 
+  const searching = !!search;
+
   return (
     <div>
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted">Filtrele</p>
-        {/* Seçimleri sıfırlar; sayfa kendi kategorisine döner */}
+        <p className="text-xs font-bold uppercase tracking-widest text-muted">{t.filter}</p>
+        {/* Seçimleri sıfırlar; sayfa kendi kategorisine döner. Arama modunda devre dışı. */}
         <button
           type="button"
           onClick={clear}
-          className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-white px-3 py-1 text-xs font-semibold text-ink/70 transition hover:border-navy-800 hover:text-navy-800"
+          disabled={searching}
+          className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-white px-3 py-1 text-xs font-semibold text-ink/70 transition hover:border-navy-800 hover:text-navy-800 disabled:pointer-events-none disabled:opacity-40"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-3.5" aria-hidden="true">
             <path d="M18 6 6 18" />
             <path d="m6 6 12 12" />
           </svg>
-          Filtreleri kaldır
+          {t.clearFilters}
         </button>
       </div>
 
-      <div className="mt-4 space-y-2">
+      {/* Arama modu: kutuya yazılan metin "seçili filtre" olarak gösterilir, kategori listesi soluklaşır */}
+      {searching && (
+        <div className="mt-4 flex items-center gap-2.5 rounded-lg border border-navy-800 bg-white py-3 pl-4 pr-4 text-sm">
+          <input type="checkbox" checked readOnly aria-hidden="true" tabIndex={-1} className="size-4 shrink-0 rounded border-ink/30 accent-gold-500" />
+          <span className="flex min-w-0 flex-1 items-center gap-2 font-bold text-ink">
+            {t.searchFilter}
+            <span className={`rounded-full ${accent} px-1.5 py-0.5 text-[10px] font-bold leading-none text-white`}>1</span>
+          </span>
+          <span className="max-w-[45%] truncate text-[13px] font-normal text-ink/70" title={search}>
+            “{search}”
+          </span>
+        </div>
+      )}
+
+      <div
+        className={`mt-4 space-y-2 transition duration-300 ${searching ? "pointer-events-none opacity-40 select-none" : ""}`}
+        inert={searching}
+        aria-disabled={searching}
+      >
         {groups.map((g) => {
           const isOpen = open === g.slug;
           const selectedInGroup = g.cats.filter((c) => selected.includes(c.slug)).length;
@@ -80,7 +108,7 @@ export function CategoryFilter({
               <div className="flex items-center gap-2.5 pl-4 transition hover:bg-navy-50">
                 <input
                   type="checkbox"
-                  aria-label={`${g.title}: tüm alt kategorileri seç`}
+                  aria-label={t.selectAll(g.title)}
                   checked={selectedInGroup === g.cats.length}
                   ref={(el) => {
                     if (el) el.indeterminate = selectedInGroup > 0 && selectedInGroup < g.cats.length;

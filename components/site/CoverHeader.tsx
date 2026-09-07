@@ -5,18 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { site } from "@/lib/site";
-import { divisions } from "@/lib/divisions";
+import { localizeDivisions } from "@/lib/i18n/content";
+import { ui } from "@/lib/i18n/ui";
+import type { Locale } from "@/lib/i18n/config";
+import { LangSwitcher } from "@/components/site/LangSwitcher";
 
 // Kurumsal (cover) sayfaların header'ı: Ege Yatçılık'taki gibi üstten sarkan,
 // alt köşeleri oval tek parça kart: transparan/cam efektli, altın çerçeveli.
 // Sol: Sektörler, Hakkımızda (cam butonlar) · Orta: logo
-// Sağ: e-posta (düz metin), sosyal ikonlar (yalın), İletişim (cam buton, en sağda)
-
-const left = [
-  { href: "/sektorler", label: "Sektörler", dropdown: true },
-  { href: "/hakkimizda", label: "Hakkımızda" },
-];
-const right = [{ href: "/iletisim", label: "İletişim" }];
+// Sağ: e-posta (düz metin), sosyal ikonlar (yalın), dil seçici, İletişim (cam buton, en sağda)
 
 // Sosyal medya: adres boşsa gösterilmez (site.ts / ileride panelden)
 const socials = [
@@ -32,9 +29,9 @@ const btn = (active = false) =>
       : "border-white/20 bg-white/5 text-white/90 hover:border-gold-400/60 hover:bg-white/10 hover:text-white"
   }`;
 
-// Sosyal ikonlar: çerçevesiz, yalın
+// Sosyal ikonlar: dil kutularından biraz küçük, çerçeveli kutular
 const iconLink =
-  "inline-flex size-8 items-center justify-center rounded-md text-white/75 transition hover:text-gold-300";
+  "inline-flex size-7 items-center justify-center rounded-md border border-white/20 bg-white/5 text-white/75 transition hover:border-white/50 hover:bg-white/10 hover:text-white";
 
 const iconBtn =
   "inline-flex size-10 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white/80 transition hover:border-gold-400/60 hover:bg-white/10 hover:text-white";
@@ -42,7 +39,7 @@ const iconBtn =
 function SocialIcon({ name }: { name: string }) {
   if (name === "instagram")
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-4">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-3.5">
         <rect x="3" y="3" width="18" height="18" rx="5" />
         <circle cx="12" cy="12" r="4" />
         <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
@@ -50,20 +47,27 @@ function SocialIcon({ name }: { name: string }) {
     );
   if (name === "linkedin")
     return (
-      <svg viewBox="0 0 24 24" fill="currentColor" className="size-4">
+      <svg viewBox="0 0 24 24" fill="currentColor" className="size-3.5">
         <path d="M6.5 8.5A1.75 1.75 0 1 1 6.5 5a1.75 1.75 0 0 1 0 3.5ZM5 10h3v9H5v-9Zm5 0h2.9v1.3c.4-.8 1.4-1.5 2.9-1.5 3 0 3.6 2 3.6 4.5V19h-3v-4.2c0-1 0-2.3-1.4-2.3s-1.6 1.1-1.6 2.2V19h-3v-9Z" />
       </svg>
     );
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="size-4">
+    <svg viewBox="0 0 24 24" fill="currentColor" className="size-3.5">
       <path d="M13.5 21v-7h2.4l.4-3h-2.8V9.1c0-.9.3-1.5 1.5-1.5h1.4V5.1c-.3 0-1.2-.1-2.2-.1-2.2 0-3.7 1.3-3.7 3.8V11H8v3h2.5v7h3Z" />
     </svg>
   );
 }
 
-export function CoverHeader() {
+export function CoverHeader({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const t = ui[locale];
+  const divisions = localizeDivisions(locale);
+  const left = [
+    { href: "/sektorler", label: t.nav.sectors, dropdown: true },
+    { href: "/hakkimizda", label: t.nav.about },
+  ];
+  const right = [{ href: "/iletisim", label: t.nav.contact }];
   const isActive = (href: string) => href.startsWith("/") && pathname.startsWith(href);
   const activeSocials = socials.filter((s) => s.href);
 
@@ -92,7 +96,6 @@ export function CoverHeader() {
                           rel={d.external ? "noopener noreferrer" : undefined}
                           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/90 hover:bg-white/10"
                         >
-                          <span className={`size-2.5 rounded-full ${d.accent}`} />
                           {d.title}
                           {d.external && <span className="text-xs text-white/50">↗</span>}
                         </a>
@@ -112,7 +115,7 @@ export function CoverHeader() {
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            aria-label="Menü"
+            aria-label={t.nav.menu}
             aria-expanded={open}
             className={`${iconBtn} justify-self-start lg:hidden`}
           >
@@ -126,20 +129,10 @@ export function CoverHeader() {
             <Image src="/logo-white.png" alt={site.name} width={760} height={228} priority className="h-11 w-auto sm:h-14" />
           </Link>
 
-          {/* Sağ butonlar + sosyal ikonlar */}
+          {/* Sağ: sosyal ikonlar (kutulu), dil seçici, İletişim */}
           <nav className="hidden items-center justify-end gap-3 lg:flex">
-            <a
-              href={`mailto:${site.email}`}
-              className="inline-flex items-center gap-1.5 px-2 text-sm font-medium text-white/80 transition hover:text-white"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-4 text-gold-300">
-                <rect x="3" y="5" width="18" height="14" rx="2" />
-                <path d="m3 7 9 6 9-6" />
-              </svg>
-              {site.email}
-            </a>
             {activeSocials.length > 0 && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 {activeSocials.map((s) => (
                   <a key={s.key} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className={iconLink}>
                     <SocialIcon name={s.key} />
@@ -147,11 +140,15 @@ export function CoverHeader() {
                 ))}
               </span>
             )}
+            <LangSwitcher current={locale} />
             <Link href="/iletisim" className={btn(isActive("/iletisim"))}>
-              İletişim
+              {t.nav.contact}
             </Link>
           </nav>
-          <span className="lg:hidden" />
+          {/* Mobil: sağda dil seçici */}
+          <div className="flex justify-end lg:hidden">
+            <LangSwitcher current={locale} />
+          </div>
         </div>
 
         {/* Mobil menü */}
@@ -179,7 +176,6 @@ export function CoverHeader() {
                     onClick={() => setOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-sm text-white/80"
                   >
-                    <span className={`size-2 rounded-full ${d.accent}`} />
                     {d.title}
                   </a>
                 ))}

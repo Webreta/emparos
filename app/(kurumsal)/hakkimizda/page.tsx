@@ -1,33 +1,27 @@
 import type { Metadata } from "next";
 import { CoverPage } from "@/components/site/CoverPage";
-import { divisions } from "@/lib/divisions";
+import { getLocale } from "@/lib/i18n/server";
+import { ui } from "@/lib/i18n/ui";
+import { coverContent, localizeDivisions } from "@/lib/i18n/content";
 
-export const metadata: Metadata = { title: "Hakkımızda" };
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return { title: ui[locale].cover.aboutTitle };
+}
 
-const values = [
-  { title: "Güven", text: "Her iş kolunda şeffaf, ölçülebilir ve sürdürülebilir iş ortaklıkları kurarız." },
-  { title: "Uzmanlık", text: "Ambalaj, tedarik ve mühendislikte alanında deneyimli ekiplerle çalışırız." },
-  { title: "Erişim", text: "İzmir merkezli yapımızla yerel ve küresel pazarları birbirine bağlarız." },
-];
-
-export default function AboutPage() {
+export default async function AboutPage() {
+  const locale = await getLocale();
+  const t = ui[locale].cover;
+  const { about } = coverContent(locale);
+  const divisions = localizeDivisions(locale);
   return (
-    <CoverPage eyebrow="Connecting Markets. Managing Trust." title="Hakkımızda">
+    <CoverPage eyebrow={t.aboutEyebrow} title={t.aboutTitle}>
       <div className="space-y-6 text-white/80">
-        <p className="text-lg leading-relaxed text-white">
-          Emparos Global; ambalaj üretiminden gıda-içecek ve temizlik ürünleri
-          tedarikine, mühendislik danışmanlığından proje yönetimine uzanan üç iş
-          kolunu tek çatı altında toplayan İzmir merkezli bir şirkettir.
-        </p>
-        <p className="leading-relaxed">
-          Her iş kolumuz kendi uzman kadrosu ve iş ortağı ağıyla çalışır; ortak
-          paydamız ise pazarları birleştirmek ve güveni yönetmektir. Kraftora Pack
-          markamızla ambalaj, Emparos Gıda ile ürün tedariki, Emparos Mühendislik
-          ile danışmanlık hizmetleri sunuyoruz.
-        </p>
+        <p className="text-lg leading-relaxed text-white">{about.lead}</p>
+        <p className="leading-relaxed">{about.body}</p>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          {values.map((v) => (
+          {about.values.map((v) => (
             <div key={v.title} className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <span className="block h-1 w-8 rounded-full bg-gold-500" />
               <h2 className="mt-3 font-bold text-white">{v.title}</h2>
@@ -37,7 +31,7 @@ export default function AboutPage() {
         </div>
 
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gold-400">İş Kollarımız</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-gold-400">{t.divisionsTitle}</h2>
           <ul className="mt-3 flex flex-wrap gap-2">
             {divisions.map((d) => (
               <li key={d.key}>

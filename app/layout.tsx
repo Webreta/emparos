@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { getTechnicalSettings } from "@/lib/data/technical";
 import { HeadCode } from "@/components/site/HeadCode";
+import { getLocale } from "@/lib/i18n/server";
 import "./globals.css";
 
 const inter = Inter({
@@ -29,10 +30,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const technical = await getTechnicalSettings();
+  const [technical, locale] = await Promise.all([getTechnicalSettings(), getLocale()]);
 
   return (
-    <html lang="tr" className={inter.variable}>
+    <html lang={locale} className={inter.variable}>
       <body>
         <HeadCode code={technical.headCode} />
         {children}

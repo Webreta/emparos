@@ -1,10 +1,12 @@
 import Image from "next/image";
-import { divisions } from "@/lib/divisions";
+import { localizeDivisions } from "@/lib/i18n/content";
+import type { Locale } from "@/lib/i18n/config";
 
 // Ana sayfa cover'ı: tam ekran, üç iş kolu üç dikey panel (seta-global mantığı).
 // Header üstte yüzdüğü için panel içerikleri alta hizalanır.
 // Masaüstünde hover edilen panel genişler; mobilde alt alta dizilir.
-export function SplitHero() {
+export function SplitHero({ locale }: { locale: Locale }) {
+  const divisions = localizeDivisions(locale);
   return (
     <section className="flex min-h-screen flex-col lg:h-screen lg:flex-row">
       {divisions.map((d, i) => (
@@ -63,16 +65,7 @@ export function SplitHero() {
             <p className="mt-3 text-sm leading-relaxed text-white/80 lg:text-base">
               {d.text}
             </p>
-            <ul className="mt-4 hidden flex-wrap gap-2 lg:flex">
-              {d.items.map((it) => (
-                <li
-                  key={it}
-                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90"
-                >
-                  {it}
-                </li>
-              ))}
-            </ul>
+            {/* Etiket çipleri kaldırıldı; metinden sonra doğrudan düğme gelir */}
             <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-navy-900 transition group-hover:gap-3">
               {d.cta}
               <svg viewBox="0 0 20 20" fill="currentColor" className="size-4">

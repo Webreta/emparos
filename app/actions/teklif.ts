@@ -5,21 +5,26 @@ import { db } from "@/db";
 import { submissions } from "@/db/schema";
 import { sectors, type Sector } from "@/lib/sectors";
 import { sendQuoteNotification } from "@/lib/mailer";
+import { defaultLocale, isLocale } from "@/lib/i18n/config";
+import { ui } from "@/lib/i18n/ui";
 
 export type QuoteState = { ok?: boolean; error?: string };
 
-const quoteSchema = z.object({
-  sector: z.enum(["gida", "muhendislik"]),
-  name: z.string().trim().min(2, "Ad soyad girin."),
-  company: z.string().trim().max(200).optional(),
-  email: z.email("Geçerli bir e-posta adresi girin."),
-  phone: z.string().trim().max(40).optional(),
-  product: z.string().trim().max(200).optional(),
-  quantity: z.string().trim().max(200).optional(),
-  message: z.string().trim().min(10, "Talebinizi birkaç cümleyle açıklayın."),
-  // Bot tuzağı: gerçek kullanıcı bu alanı görmez ve doldurmaz
-  website: z.string().max(0).optional(),
-});
+// Hata mesajları formun dilinde (gizli `locale` alanı); şema her istekte o dilin metinleriyle kurulur
+function quoteSchema(msg: (typeof ui)["tr"]["quote"]["errors"]) {
+  return z.object({
+    sector: z.enum(["gida", "muhendislik"]),
+    name: z.string().trim().min(2, msg.name),
+    company: z.string().trim().max(200).optional(),
+    email: z.email(msg.email),
+    phone: z.string().trim().max(40).optional(),
+    product: z.string().trim().max(200).optional(),
+    quantity: z.string().trim().max(200).optional(),
+    message: z.string().trim().min(10, msg.message),
+    // Bot tuzağı: gerçek kullanıcı bu alanı görmez ve doldurmaz
+    website: z.string().max(0).optional(),
+  });
+}
 
 function str(formData: FormData, key: string) {
   const v = formData.get(key);
@@ -32,7 +37,9 @@ export async function sendQuoteRequest(
   _prev: QuoteState,
   formData: FormData
 ): Promise<QuoteState> {
-  const parsed = quoteSchema.safeParse({
+  const lang = str(formData, "locale");
+  const msg = ui[isLocale(lang) ? lang : defaultLocale].quote.errors;
+  const parsed = quoteSchema(msg).safeParse({
     sector: str(formData, "sector"),
     name: str(formData, "name"),
     company: str(formData, "company"),
@@ -44,7 +51,7 @@ export async function sendQuoteRequest(
     website: str(formData, "website"),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Formu kontrol edin." };
+    return { error: parsed.error.issues[0]?.message ?? msg.check };
   }
 
   const data = parsed.data;
@@ -68,7 +75,7 @@ export async function sendQuoteRequest(
     });
   } catch (err) {
     console.error("Teklif kaydı yazılamadı:", err);
-    return { error: "Talebiniz kaydedilemedi. Lütfen tekrar deneyin ya da bizi arayın." };
+    return { error: msg.save };
   }
 
   // E-posta gitmese de kayıt DB'de; kullanıcıya başarı döneriz, hatayı loglarız

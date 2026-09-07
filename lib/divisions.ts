@@ -29,8 +29,9 @@ export const divisions: Division[] = [
     cta: "Kraftora Pack'e Git",
     accent: "bg-kraft-500",
     accentText: "text-kraft-500",
-    bg: "from-[#2b1a0e] via-[#4a2f1a] to-[#7a4a26]",
-    image: "/kapak/ambalaj-kraft.jpg",
+    // Diğer panellerle uyumlu lacivert örtü (kraft görselinin üstüne biner)
+    bg: "from-[#0c1424] via-[#142038] to-[#2a3a5e]",
+    image: "/kapak/ambalaj-kraft.jpg", // görseller/478.jpg (kraft çantalar)
     items: ["Kraft torba ve poşet", "Oluklu mukavva kutu", "Özel baskılı ambalaj"],
   },
   {
